@@ -4,6 +4,9 @@ extends Node
 ## - BattleManager에서 유닛 목록을 받아 3D 스테이지에 배치
 ## - 2D 전투 씬과 동일한 UI(BattleUI)를 BattleManager에 연결
 
+const ReactionTypes = preload("res://Scripts/Reaction/reaction_types.gd")
+const ReactionResolver = preload("res://Scripts/Reaction/reaction_resolver.gd")
+
 @onready var battle_manager: BattleManager = $BattleManager
 @onready var stage_3d: Node3D = $World3D/BattleStage3D
 
@@ -22,6 +25,11 @@ var selected_unit: BattleUnit = null
 func _ready() -> void:
 	_init_ui()
 	## BattleManager와 Stage가 모두 _ready 된 뒤에 3D 유닛 배치를 수행하기 위해 지연 호출.
+	if battle_manager and stage_3d:
+		if battle_manager.has_signal("unit_damaged"):
+			battle_manager.unit_damaged.connect(_on_unit_damaged)
+		if battle_manager.has_signal("unit_died"):
+			battle_manager.unit_died.connect(_on_unit_died)
 	call_deferred("_setup_3d_units")
 
 
@@ -32,6 +40,16 @@ func _setup_3d_units() -> void:
 		return
 	if stage_3d.has_method("spawn_units_from_manager"):
 		stage_3d.spawn_units_from_manager(battle_manager)
+		# 유닛 스폰 이후 현재 계획 유닛을 다시 3D 스테이지에 반영
+		if battle_manager.has_method("get_current_planning_unit") and stage_3d.has_method("set_active_unit"):
+			var u: BattleUnit = battle_manager.get_current_planning_unit()
+			if u:
+				stage_3d.set_active_unit(u.name)
+		# 초기 HP 표시 동기화
+		if stage_3d.has_method("update_hp_label"):
+			for u_hp in battle_manager.get_all_units():
+				if u_hp:
+					stage_3d.update_hp_label(u_hp.name)
 
 
 func _init_ui() -> void:
@@ -89,6 +107,8 @@ func _init_ui() -> void:
 	# BattleManager 신호를 UI에 연결
 	battle_manager.state_changed.connect(_on_state_changed)
 	battle_manager.current_planning_unit_changed.connect(_on_current_planning_unit)
+	if battle_manager.has_signal("reaction_needed"):
+		battle_manager.reaction_needed.connect(_on_reaction_needed)
 
 
 func _set_action_panel_mouse_filter(node: Node, filter: Control.MouseFilter) -> void:
@@ -110,6 +130,9 @@ func _on_state_changed(s: BattleManager.State) -> void:
 	if stage_3d and stage_3d.has_method("clear_active_unit"):
 		if s == BattleManager.State.EXECUTE or s == BattleManager.State.ROUND_END:
 			stage_3d.clear_active_unit()
+	# 타겟팅 모드 토글
+	if stage_3d and stage_3d.has_method("set_targeting_mode"):
+		stage_3d.set_targeting_mode(s == BattleManager.State.ALLY_SELECT_TARGET)
 
 
 func _on_current_planning_unit(unit: BattleUnit) -> void:
@@ -124,6 +147,34 @@ func _on_current_planning_unit(unit: BattleUnit) -> void:
 		else:
 			if stage_3d.has_method("clear_active_unit"):
 				stage_3d.clear_active_unit()
+
+
+func _on_reaction_needed(attacker: BattleUnit, target: BattleUnit, base_damage: int) -> void:
+	# 리액션 선택이 끝나야 EXECUTE 단계가 계속 진행되므로, 비동기 처리 후 continue_execute_phase 호출
+	if not reaction_panel or not battle_manager:
+		battle_manager.continue_execute_phase()
+		return
+	_handle_reaction_async(attacker, target, base_damage)
+
+
+func _handle_reaction_async(attacker: BattleUnit, target: BattleUnit, base_damage: int) -> void:
+	if not reaction_panel or not battle_manager:
+		battle_manager.continue_execute_phase()
+		return
+	var reaction: ReactionTypes.Reaction = await reaction_panel.choose_reaction(attacker, target)
+	var result: Dictionary = ReactionResolver.resolve(attacker, target, base_damage, reaction)
+	battle_manager.apply_reaction_damage(attacker, target, result)
+	battle_manager.continue_execute_phase()
+
+
+func _on_unit_damaged(unit: BattleUnit, _amount: int) -> void:
+	if stage_3d and stage_3d.has_method("update_hp_label") and unit:
+		stage_3d.update_hp_label(unit.name)
+
+
+func _on_unit_died(unit: BattleUnit) -> void:
+	if stage_3d and stage_3d.has_method("update_hp_label") and unit:
+		stage_3d.update_hp_label(unit.name)
 
 
 func set_selected_unit(unit: BattleUnit) -> void:

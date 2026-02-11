@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://csda1ggtkgvmm"]
 
 [ext_resource type="Script" uid="uid://b4yi1nf87b2t7" path="res://Scripts/Battle/battle_manager.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://ldvugv1ymel5" path="res://Scenes/Battle/BattleStage3D.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/Battle/BattleStage3D.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://Scenes/Battle/BattleUI.tscn" id="3"]
 [ext_resource type="Script" uid="uid://2kk1et6yk0xn" path="res://Scripts/Battle/battle_scene_3d.gd" id="4"]
 [ext_resource type="Script" uid="uid://frt8hpi2gsso" path="res://Scripts/Battle/battle_event_dispatcher.gd" id="5"]

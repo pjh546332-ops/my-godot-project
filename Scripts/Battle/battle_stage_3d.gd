@@ -19,8 +19,13 @@ const ENEMY_SLOTS: Array[Vector3] = [
 	Vector3(6.0, 0.5, -1.4),  # 아래-바깥
 ]
 
+const ARROW_HEAD_LENGTH: float = 0.25
+
 @onready var units_root: Node3D = $StageRoot3D/Units
 @onready var camera_3d: Camera3D = $Camera3D
+@onready var _target_arrow: Node3D = $TargetArrow
+@onready var _arrow_shaft: MeshInstance3D = $TargetArrow/Shaft
+@onready var _arrow_head: MeshInstance3D = $TargetArrow/Head
 
 var _placeholders_created: bool = false
 var _ally_texture: Texture2D
@@ -78,6 +83,10 @@ func spawn_units_from_manager(manager: BattleManager) -> void:
 			break
 		_spawn_unit_sprite(u, ENEMY_SLOTS[idx], _enemy_texture, Color(0.95, 0.5, 0.5, 1.0))
 		idx += 1
+
+	# 유닛 스폰 이전에 활성화 요청이 들어온 경우(pending)를 처리
+	if _active_unit_id != "":
+		set_active_unit(_active_unit_id)
 
 
 func _clear_units() -> void:
@@ -152,6 +161,18 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	sprite.position = Vector3(0, 0.8, 0)
 	holder.add_child(sprite)
 
+	## HP 텍스트 Label3D
+	var hp_label := Label3D.new()
+	hp_label.name = "HPLabel"
+	hp_label.position = Vector3(0, 2.0, 0)
+	hp_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	if "max_hp" in unit:
+		hp_label.text = "HP: %d/%d" % [unit.hp, unit.max_hp]
+	else:
+		hp_label.text = "HP: %d" % unit.hp
+	hp_label.pixel_size = 0.01
+	holder.add_child(hp_label)
+
 
 func _process(_delta: float) -> void:
 	## 매 프레임 카메라를 향하도록 회전 (billboard 효과)
@@ -162,6 +183,10 @@ func _process(_delta: float) -> void:
 		if c is Node3D:
 			var n := c as Node3D
 			n.look_at(cam_pos, Vector3.UP)
+
+	# 타겟팅 화살표 업데이트 (활성화된 경우에만)
+	if _target_arrow and _target_arrow.visible:
+		_update_target_arrow()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -190,11 +215,18 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
 	var result: Dictionary = space_state.intersect_ray(query)
+	var hit_collider: Object = result.get("collider", null)
+	var hit_name: String = ""
+	if hit_collider != null and hit_collider is Node:
+		hit_name = (hit_collider as Node).name
+	else:
+		hit_name = str(hit_collider)
+	print("[PICK] hit=", not result.is_empty(), " collider=", hit_name)
 	if result.is_empty():
 		_clear_selection()
 		return
 
-	var collider: Object = result.get("collider", null)
+	var collider: Object = hit_collider
 	if collider == null:
 		_clear_selection()
 		return
@@ -219,12 +251,13 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 		_clear_selection()
 		return
 
-	# 3D에서 적 유닛을 클릭했을 때 타겟 선택 모드라면 BattleManager에 위임
+	# 3D에서 적 유닛을 클릭했을 때 타겟 선택 모드라면 BattleManager에 위임 + 선택 링 갱신
 	if _manager != null \
 			and _manager._state == BattleManager.State.ALLY_SELECT_TARGET \
 			and unit.is_enemy() \
 			and unit.is_alive():
 		_manager.on_enemy_clicked(unit)
+		_set_selection(unit, holder.global_position)
 		return
 
 	_set_selection(unit, holder.global_position)
@@ -273,7 +306,86 @@ func _get_unit_node(unit_id: String) -> Node3D:
 	return node
 
 
+func update_hp_label(unit_id: String) -> void:
+	var holder := _get_unit_node(unit_id)
+	if holder == null:
+		return
+	if not holder.has_meta("unit_ref"):
+		return
+	var unit: BattleUnit = holder.get_meta("unit_ref")
+	if unit == null:
+		return
+	var hp_label: Label3D = holder.get_node_or_null("HPLabel")
+	if hp_label == null:
+		return
+	if "max_hp" in unit:
+		hp_label.text = "HP: %d/%d" % [unit.hp, unit.max_hp]
+	else:
+		hp_label.text = "HP: %d" % unit.hp
+
+
+func set_targeting_mode(enabled: bool) -> void:
+	if _target_arrow:
+		_target_arrow.visible = enabled
+
+
+func _update_target_arrow() -> void:
+	# 활성 유닛이 없으면 화살표 숨김
+	if _active_unit_id == "":
+		_target_arrow.visible = false
+		return
+	var holder := _get_unit_node(_active_unit_id)
+	if holder == null:
+		_target_arrow.visible = false
+		return
+
+	# 시작점: 활성 유닛 머리 위
+	var start: Vector3 = holder.global_position + Vector3(0, 2.0, 0)
+
+	# 끝점: 카메라에서 마우스 레이를 쏴 y=0.5 평면과 교차
+	if camera_3d == null:
+		return
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = camera_3d.project_ray_origin(mouse_pos)
+	var ray_dir: Vector3 = camera_3d.project_ray_normal(mouse_pos)
+	var plane: Plane = Plane(Vector3.UP, -0.5)
+	var hit: Variant = plane.intersects_ray(ray_origin, ray_dir)
+	var end: Vector3
+	if hit is Vector3:
+		end = hit
+	else:
+		end = ray_origin + ray_dir * 20.0
+
+	var dir: Vector3 = end - start
+	var len: float = dir.length()
+	if len <= 0.01:
+		_target_arrow.visible = false
+		return
+
+	# TargetArrow를 start 위치에 두고, dir 방향으로 로컬 Y축을 맞춘다.
+	var forward: Vector3 = dir.normalized()
+	var up: Vector3 = Vector3.UP
+	var right: Vector3 = up.cross(forward).normalized()
+	up = forward.cross(right).normalized()
+	var basis := Basis(right, up, forward)
+	_target_arrow.global_transform = Transform3D(basis, start)
+
+	# Shaft/Head 길이와 위치 조정
+	var shaft_len: float = max(len - ARROW_HEAD_LENGTH, 0.1)
+	if _arrow_shaft:
+		_arrow_shaft.scale.y = shaft_len
+		_arrow_shaft.position = Vector3(0, shaft_len * 0.5, 0)
+	if _arrow_head:
+		_arrow_head.position = Vector3(0, shaft_len, 0)
+
+
 func set_active_unit(unit_id: String) -> void:
+	# 노드가 아직 생성되지 않은 경우: ID만 저장했다가 나중에 스폰 후 적용
+	var holder_pending := _get_unit_node(unit_id)
+	if holder_pending == null:
+		_active_unit_id = unit_id
+		return
+
 	# 이전 활성 유닛 원복
 	if _active_unit_id != "":
 		var prev_holder := _get_unit_node(_active_unit_id)
@@ -287,9 +399,7 @@ func set_active_unit(unit_id: String) -> void:
 	_active_unit_id = ""
 
 	# 새 유닛 활성화
-	var holder := _get_unit_node(unit_id)
-	if holder == null:
-		return
+	var holder := holder_pending
 
 	var outline: Sprite3D = holder.get_node_or_null("Outline")
 	if outline:

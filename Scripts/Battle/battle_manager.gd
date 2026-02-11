@@ -121,6 +121,9 @@ func _current_planning_unit() -> BattleUnit:
 		return null
 	return plan_order[current_plan_index]
 
+func get_current_planning_unit() -> BattleUnit:
+	return _current_planning_unit()
+
 ## 아군 영역 x=0..4, 최전열(노란선에 가까움) x=4. dist = abs(4 - cell.x)
 static func _ally_center_dist(cell: Vector2i) -> int:
 	return abs(4 - cell.x)
@@ -153,6 +156,7 @@ func _plan_all_enemies() -> void:
 			plans[u] = BattleAction.make_attack(u, t)
 			enemy_intent_lines.append("%s: ATTACK -> %s" % [u.name, t.name])
 		plan_stored.emit(u, plans[u])
+		print("[BattleManager] plan_stored for enemy:", u.name)
 
 func _advance_plan() -> void:
 	while current_plan_index < plan_order.size():
@@ -216,7 +220,19 @@ func on_confirm_target() -> void:
 	_advance_plan()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion or event is InputEventMouseButton:
+	# 마우스 우클릭으로 Attack 타겟 선택 취소
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT:
+			if _state == State.ALLY_SELECT_TARGET:
+				selected_enemy = null
+				_state = State.ALLY_SELECT_ACTION
+				state_changed.emit(_state)
+				current_planning_unit_changed.emit(_current_planning_unit())
+				_update_highlights()
+				get_viewport().set_input_as_handled()
+			return
+	if event is InputEventMouseMotion:
 		return
 	if _state == State.ALLY_SELECT_TARGET and Input.is_action_just_pressed("ui_accept"):
 		on_confirm_target()
@@ -236,6 +252,7 @@ func get_enemy_intent_lines() -> Array:
 func _execute_phase() -> void:
 	_state = State.EXECUTE
 	state_changed.emit(_state)
+	print("[BattleManager] EXECUTE phase start, round %d" % current_round)
 	for u in get_all_units():
 		u.set_highlight(false)
 	_execute_index = 0
@@ -294,6 +311,7 @@ func _apply_attack_damage(attacker: BattleUnit, target: BattleUnit, damage_to_ta
 	if damage_to_target > 0:
 		target.take_damage(damage_to_target)
 		unit_damaged.emit(target, damage_to_target)
+		print("[BattleManager] action_resolved:", attacker.name, "->", target.name, "damage", damage_to_target)
 		action_resolved.emit(attacker.name, target.name, damage_to_target)
 		if not target.is_alive():
 			unit_died.emit(target)
@@ -301,6 +319,7 @@ func _apply_attack_damage(attacker: BattleUnit, target: BattleUnit, damage_to_ta
 	if damage_to_attacker > 0:
 		attacker.take_damage(damage_to_attacker)
 		unit_damaged.emit(attacker, damage_to_attacker)
+		print("[BattleManager] action_resolved:", target.name, "->", attacker.name, "damage", damage_to_attacker)
 		action_resolved.emit(target.name, attacker.name, damage_to_attacker)
 		if not attacker.is_alive():
 			unit_died.emit(attacker)
