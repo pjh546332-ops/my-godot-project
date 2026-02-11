@@ -76,6 +76,14 @@ func _init_ui() -> void:
 	reaction_panel = ui_root.get_node_or_null("Margin/VBox/ReactionPanel")
 	bottom_ui = ui_root.get_node_or_null("BottomUI")
 
+	# 3D 피킹을 막지 않도록 배경성 Control은 입력을 무시하게 강제
+	if ui_root is Control:
+		(ui_root as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if bottom_ui:
+		bottom_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if deselect_overlay:
+		deselect_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	# 각 UI 위젯에 BattleManager 주입
 	if turn_track:
 		turn_track.setup(battle_manager)

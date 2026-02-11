@@ -33,8 +33,6 @@ var _selection_ring: MeshInstance3D = null
 var _unit_nodes: Dictionary = {}
 var _manager: BattleManager = null
 var _active_unit_id: String = ""
-var _active_base_scale: Vector3 = Vector3.ONE
-var _active_base_y: float = 0.0
 
 
 func _ready() -> void:
@@ -125,6 +123,9 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	var holder := Node3D.new()
 	holder.position = local_pos
 	holder.set_meta("unit_ref", unit)
+	# 원본 스케일/높이를 메타로 보관 (강조/복원에 사용)
+	holder.set_meta("base_scale", holder.scale)
+	holder.set_meta("base_y", holder.position.y)
 	units_root.add_child(holder)
 	_unit_nodes[unit.name] = holder
 
@@ -191,7 +192,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
 			return
 
-		if get_viewport().gui_get_hovered_control() != null:
+		var hovered := get_viewport().gui_get_hovered_control()
+		if hovered != null and hovered is Control and (hovered as Control).mouse_filter == Control.MOUSE_FILTER_STOP:
 			return
 
 		_perform_unit_pick(mb.position)
@@ -331,6 +333,10 @@ func get_active_unit_head_world_pos() -> Vector3:
 
 
 func set_active_unit(unit_id: String) -> void:
+	# 이미 같은 유닛이 활성화되어 있으면 중복 연출 방지
+	if unit_id == _active_unit_id:
+		return
+
 	# 노드가 아직 생성되지 않은 경우: ID만 저장했다가 나중에 스폰 후 적용
 	var holder_pending := _get_unit_node(unit_id)
 	if holder_pending == null:
@@ -344,8 +350,10 @@ func set_active_unit(unit_id: String) -> void:
 			var prev_outline: Sprite3D = prev_holder.get_node_or_null("Outline")
 			if prev_outline:
 				prev_outline.visible = false
-			prev_holder.scale = _active_base_scale
-			prev_holder.position.y = _active_base_y
+			if prev_holder.has_meta("base_scale"):
+				prev_holder.scale = prev_holder.get_meta("base_scale")
+			if prev_holder.has_meta("base_y"):
+				prev_holder.position.y = prev_holder.get_meta("base_y")
 
 	_active_unit_id = ""
 
@@ -357,12 +365,20 @@ func set_active_unit(unit_id: String) -> void:
 		outline.visible = true
 
 	_active_unit_id = unit_id
-	_active_base_scale = holder.scale
-	_active_base_y = holder.position.y
+	var base_scale: Vector3
+	if holder.has_meta("base_scale"):
+		base_scale = holder.get_meta("base_scale")
+	else:
+		base_scale = holder.scale
+	var base_y: float
+	if holder.has_meta("base_y"):
+		base_y = holder.get_meta("base_y")
+	else:
+		base_y = holder.position.y
 
 	var tween: Tween = create_tween()
-	tween.tween_property(holder, "scale", _active_base_scale * 1.18, 0.12)
-	tween.parallel().tween_property(holder, "position:y", _active_base_y + 0.15, 0.12)
+	tween.tween_property(holder, "scale", base_scale * 1.18, 0.12)
+	tween.parallel().tween_property(holder, "position:y", base_y + 0.15, 0.12)
 
 
 func clear_active_unit() -> void:
@@ -373,11 +389,11 @@ func clear_active_unit() -> void:
 		var outline: Sprite3D = holder.get_node_or_null("Outline")
 		if outline:
 			outline.visible = false
-		holder.scale = _active_base_scale
-		holder.position.y = _active_base_y
+		if holder.has_meta("base_scale"):
+			holder.scale = holder.get_meta("base_scale")
+		if holder.has_meta("base_y"):
+			holder.position.y = holder.get_meta("base_y")
 	_active_unit_id = ""
-	_active_base_scale = Vector3.ONE
-	_active_base_y = 0.0
 
 
 func play_turn_started(unit_id: String) -> void:
