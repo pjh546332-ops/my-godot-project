@@ -59,28 +59,85 @@ func _ensure_input_map() -> void:
 func _init_units() -> void:
 	ally_units_sorted.clear()
 	enemy_units.clear()
-	var a1 := BattleUnit.new("1", BattleUnit.Team.ALLY)
-	a1.cell = Vector2i(1, 2)
-	var a2 := BattleUnit.new("2", BattleUnit.Team.ALLY)
-	a2.cell = Vector2i(2, 2)
-	var a3 := BattleUnit.new("3", BattleUnit.Team.ALLY)
-	a3.cell = Vector2i(3, 2)
-	var a4 := BattleUnit.new("4", BattleUnit.Team.ALLY)
-	a4.cell = Vector2i(1, 3)
-	var a5 := BattleUnit.new("5", BattleUnit.Team.ALLY)
-	a5.cell = Vector2i(2, 3)
-	ally_units_sorted.assign([a1, a2, a3, a4, a5])
-	var e1 := BattleUnit.new("E1", BattleUnit.Team.ENEMY)
-	e1.cell = Vector2i(6, 2)
-	var e2 := BattleUnit.new("E2", BattleUnit.Team.ENEMY)
-	e2.cell = Vector2i(7, 2)
-	var e3 := BattleUnit.new("E3", BattleUnit.Team.ENEMY)
-	e3.cell = Vector2i(6, 3)
-	var e4 := BattleUnit.new("E4", BattleUnit.Team.ENEMY)
-	e4.cell = Vector2i(7, 3)
-	var e5 := BattleUnit.new("E5", BattleUnit.Team.ENEMY)
-	e5.cell = Vector2i(8, 3)
-	enemy_units.assign([e1, e2, e3, e4, e5])
+	# 아군: AllyRoster를 통해 생성(정의/성장 데이터 기반).
+	var roster := get_node_or_null("/root/AllyRoster")
+	if roster:
+		var ally_party_ids := [
+			"ALLY_ERICH",
+			"ALLY_2",
+			"ALLY_3",
+			"ALLY_4",
+			"ALLY_5",
+		]
+		var ally_cells := [
+			Vector2i(1, 2),
+			Vector2i(2, 2),
+			Vector2i(3, 2),
+			Vector2i(1, 3),
+			Vector2i(2, 3),
+		]
+		var allies: Array[BattleUnit] = []
+		for i in range(ally_party_ids.size()):
+			var id: String = ally_party_ids[i]
+			var u: BattleUnit = roster.make_battle_unit(id)
+			if u:
+				u.cell = ally_cells[i]
+				allies.append(u)
+		if allies.size() > 0:
+			ally_units_sorted.assign(allies)
+	else:
+		# 폴백: 기존 디버그용 아군 생성
+		var a1 := BattleUnit.new("1", BattleUnit.Team.ALLY)
+		a1.cell = Vector2i(1, 2)
+		var a2 := BattleUnit.new("2", BattleUnit.Team.ALLY)
+		a2.cell = Vector2i(2, 2)
+		var a3 := BattleUnit.new("3", BattleUnit.Team.ALLY)
+		a3.cell = Vector2i(3, 2)
+		var a4 := BattleUnit.new("4", BattleUnit.Team.ALLY)
+		a4.cell = Vector2i(1, 3)
+		var a5 := BattleUnit.new("5", BattleUnit.Team.ALLY)
+		a5.cell = Vector2i(2, 3)
+		ally_units_sorted.assign([a1, a2, a3, a4, a5])
+
+	# 적: EnemyCatalog를 통해 생성(정의 기반).
+	var catalog := get_node_or_null("/root/EnemyCatalog")
+	if catalog:
+		var enemy_spawn_ids := [
+			"ENEMY_GOBLIN",
+			"ENEMY_GOBLIN",
+			"ENEMY_SHAMAN",
+			"ENEMY_GOBLIN",
+			"ENEMY_ARCHER",
+		]
+		var enemy_cells := [
+			Vector2i(6, 2),
+			Vector2i(7, 2),
+			Vector2i(6, 3),
+			Vector2i(7, 3),
+			Vector2i(8, 3),
+		]
+		var enemies: Array[BattleUnit] = []
+		for i in range(enemy_spawn_ids.size()):
+			var eid: String = enemy_spawn_ids[i]
+			var e: BattleUnit = catalog.make_enemy_unit(eid)
+			if e:
+				e.cell = enemy_cells[i]
+				enemies.append(e)
+		if enemies.size() > 0:
+			enemy_units.assign(enemies)
+	else:
+		# 폴백: 기존 디버그용 적 생성
+		var e1 := BattleUnit.new("E1", BattleUnit.Team.ENEMY)
+		e1.cell = Vector2i(6, 2)
+		var e2 := BattleUnit.new("E2", BattleUnit.Team.ENEMY)
+		e2.cell = Vector2i(7, 2)
+		var e3 := BattleUnit.new("E3", BattleUnit.Team.ENEMY)
+		e3.cell = Vector2i(6, 3)
+		var e4 := BattleUnit.new("E4", BattleUnit.Team.ENEMY)
+		e4.cell = Vector2i(7, 3)
+		var e5 := BattleUnit.new("E5", BattleUnit.Team.ENEMY)
+		e5.cell = Vector2i(8, 3)
+		enemy_units.assign([e1, e2, e3, e4, e5])
 
 static func _speed_bonus(cell: Vector2i) -> int:
 	if cell.y == 0:
@@ -344,3 +401,14 @@ func continue_execute_phase() -> void:
 
 func _current_ally() -> BattleUnit:
 	return _current_planning_unit()
+
+
+## 전투 종료 후 외부(게임 루트 등)에서 호출해 아군 경험치를 분배하기 위한 헬퍼.
+## rewards 예: { "ALLY_1": 30, "ALLY_2": 10 }
+func grant_battle_rewards(rewards: Dictionary) -> void:
+	var roster := get_node_or_null("/root/AllyRoster")
+	if roster == null:
+		return
+	if not roster.has_method("grant_battle_rewards"):
+		return
+	roster.grant_battle_rewards(rewards)

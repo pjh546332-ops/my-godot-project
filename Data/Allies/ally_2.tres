@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Defs/character_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "ALLY_2"
+display_name = "Jacques"
+base_strength = 5
+base_vitality = 6
+base_agility = 4

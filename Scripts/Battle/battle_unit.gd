@@ -4,6 +4,10 @@ extends RefCounted
 
 const ReactionTypes = preload("res://Scripts/Reaction/reaction_types.gd")
 
+## 캐릭터/적 공통 정의 + (선택) 아군 성장 데이터
+var definition: UnitDefinition = null
+var progress: CharacterProgress = null
+
 enum Team { ALLY, ENEMY }
 
 var name: String = ""
@@ -39,25 +43,49 @@ func _init(p_name: String = "", p_team: int = Team.ALLY) -> void:
 		vitality = 3
 	hp = max_hp
 
+## 성장/정의 기반 전투 스탯 조회용 헬퍼(getter)
+func get_strength() -> int:
+	if definition:
+		var base := definition.base_strength
+		var bonus := (progress.bonus_strength if progress else 0)
+		return base + bonus
+	return strength
+
+
+func get_vitality() -> int:
+	if definition:
+		var base := definition.base_vitality
+		var bonus := (progress.bonus_vitality if progress else 0)
+		return base + bonus
+	return vitality
+
+
+func get_agility() -> int:
+	if definition:
+		var base := definition.base_agility
+		var bonus := (progress.bonus_agility if progress else 0)
+		return base + bonus
+	return agility
+
 ## 파생: 공격력 = str
 var attack: int: get = _get_attack
-func _get_attack() -> int: return strength
+func _get_attack() -> int: return get_strength()
 
 ## 파생: 방어력 = str
 var defense: int: get = _get_defense
-func _get_defense() -> int: return strength
+func _get_defense() -> int: return get_strength()
 
 ## 파생: 최대 HP = vit * 10
 var max_hp: int: get = _get_max_hp
-func _get_max_hp() -> int: return vitality * 10
+func _get_max_hp() -> int: return get_vitality() * 10
 
 ## 파생: 속도 보정 = agi
 var speed_bonus: int: get = _get_speed_bonus
-func _get_speed_bonus() -> int: return agility
+func _get_speed_bonus() -> int: return get_agility()
 
 ## 파생: 회피율(%) = agi * 0.7
 var evasion_rate: float: get = _get_evasion_rate
-func _get_evasion_rate() -> float: return agility * 0.7
+func _get_evasion_rate() -> float: return get_agility() * 0.7
 
 func is_ally() -> bool:
 	return team == Team.ALLY

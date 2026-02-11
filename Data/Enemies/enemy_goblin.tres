@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Defs/enemy_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "ENEMY_GOBLIN"
+display_name = "Goblin"
+base_strength = 3
+base_vitality = 3
+base_agility = 4
+ai_profile = 0
+level = 1
+exp_reward = 8

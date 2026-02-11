@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Defs/enemy_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "ENEMY_ARCHER"
+display_name = "Archer"
+base_strength = 4
+base_vitality = 2
+base_agility = 6
+ai_profile = 0
+level = 1
+exp_reward = 10

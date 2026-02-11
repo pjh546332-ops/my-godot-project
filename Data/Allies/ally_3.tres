@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Defs/character_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "ALLY_3"
+display_name = "Lina"
+base_strength = 4
+base_vitality = 4
+base_agility = 7

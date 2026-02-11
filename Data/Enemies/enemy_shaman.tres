@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Defs/enemy_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "ENEMY_SHAMAN"
+display_name = "Shaman"
+base_strength = 2
+base_vitality = 4
+base_agility = 3
+ai_profile = 1
+level = 1
+exp_reward = 15

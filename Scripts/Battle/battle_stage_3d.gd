@@ -33,6 +33,7 @@ var _selection_ring: MeshInstance3D = null
 var _unit_nodes: Dictionary = {}
 var _manager: BattleManager = null
 var _active_unit_id: String = ""
+var _target_unit_id: String = ""
 
 
 func _ready() -> void:
@@ -86,6 +87,7 @@ func spawn_units_from_manager(manager: BattleManager) -> void:
 
 func _clear_units() -> void:
 	clear_active_unit()
+	clear_target_unit()
 	for c in units_root.get_children():
 		c.queue_free()
 	_unit_nodes.clear()
@@ -141,10 +143,15 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	area.add_child(shape)
 	holder.add_child(area)
 
+	# 유닛 정의에 스프라이트가 있으면 우선 사용
+	var sprite_tex: Texture2D = tex
+	if unit.definition and unit.definition.sprite_3d:
+		sprite_tex = unit.definition.sprite_3d
+
 	## 아웃라인 Sprite3D (노란 테두리, 기본 비활성)
 	var outline := Sprite3D.new()
 	outline.name = "Outline"
-	outline.texture = tex
+	outline.texture = sprite_tex
 	outline.modulate = Color(1.0, 1.0, 0.2, 1.0)
 	outline.pixel_size = 0.01
 	outline.position = Vector3(0, 0.8, 0)
@@ -155,7 +162,7 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	## 실제 표시용 Sprite3D (아웃라인 위에 렌더되도록 나중에 추가)
 	var sprite := Sprite3D.new()
 	sprite.name = "Sprite"
-	sprite.texture = tex
+	sprite.texture = sprite_tex
 	sprite.modulate = tint
 	sprite.pixel_size = 0.01
 	sprite.position = Vector3(0, 0.8, 0)
@@ -217,6 +224,7 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 	print("[PICK] collider=", str(result.get("collider")))
 	if result.is_empty():
 		_clear_selection()
+		clear_target_unit()
 		return
 
 	var collider: Object = hit_collider
@@ -244,12 +252,12 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 		_clear_selection()
 		return
 
-	# 타겟 선택 모드에서는 적 클릭을 BattleManager에만 전달하고, 선택 링만 표시
-	# (unit_clicked 시그널은 emit 하지 않아 StatsPanel이 뜨지 않도록 한다)
+	# 타겟 선택 모드: 적 클릭 시 BattleManager 전달 + 선택 링 + 타겟 Outline 강조
 	if _manager != null and _manager._state == BattleManager.State.ALLY_SELECT_TARGET:
 		if unit.is_enemy() and unit.is_alive():
 			_manager.on_enemy_clicked(unit)
 			_set_selection(unit, holder.global_position)
+			set_target_unit(unit.name)
 			return
 
 	# 그 외 상태에서도 현재는 StatsPanel 기능을 완전히 OFF 하기 위해
@@ -300,47 +308,23 @@ func _get_unit_node(unit_id: String) -> Node3D:
 	return node
 
 
-func _restore_holder_to_base(holder: Node3D) -> void:
-	if holder.has_meta("base_scale"):
-		holder.scale = holder.get_meta("base_scale")
-	if holder.has_meta("base_y"):
-		holder.position.y = holder.get_meta("base_y")
-
-
-## 리액션 등에서 "상태를 남기지 않는" 1회 펄스 연출
-func pulse_once(unit_id: String, with_outline: bool = false) -> void:
-	var holder := _get_unit_node(unit_id)
-	if holder == null:
-		return
-
-	_restore_holder_to_base(holder)
-
+func _set_outline_color(holder: Node3D, c: Color) -> void:
 	var outline: Sprite3D = holder.get_node_or_null("Outline")
-	if with_outline and outline:
-		outline.visible = true
+	if outline:
+		outline.modulate = c
 
-	var base_scale: Vector3
-	if holder.has_meta("base_scale"):
-		base_scale = holder.get_meta("base_scale")
-	else:
-		base_scale = holder.scale
 
-	var base_y: float
-	if holder.has_meta("base_y"):
-		base_y = holder.get_meta("base_y")
-	else:
-		base_y = holder.position.y
+func _set_outline_visible(holder: Node3D, on: bool) -> void:
+	var outline: Sprite3D = holder.get_node_or_null("Outline")
+	if outline:
+		outline.visible = on
 
-	var tween: Tween = create_tween()
-	tween.tween_property(holder, "scale", base_scale * 1.18, 0.12)
-	tween.parallel().tween_property(holder, "position:y", base_y + 0.15, 0.12)
-	tween.tween_property(holder, "scale", base_scale, 0.12)
-	tween.parallel().tween_property(holder, "position:y", base_y, 0.12)
-	tween.tween_callback(func() -> void:
-		_restore_holder_to_base(holder)
-		if with_outline and outline and is_instance_valid(outline):
-			outline.visible = false
-	)
+
+func _clear_all_outlines() -> void:
+	for id in _unit_nodes.keys():
+		var h: Node3D = _get_unit_node(id)
+		if h:
+			_set_outline_visible(h, false)
 
 
 func update_hp_label(unit_id: String) -> void:
@@ -371,52 +355,28 @@ func get_active_unit_head_world_pos() -> Vector3:
 
 
 func set_active_unit(unit_id: String) -> void:
-	# 이미 같은 유닛이 활성화되어 있으면 중복 연출 방지
 	if unit_id == _active_unit_id:
 		return
 
-	# 노드가 아직 생성되지 않은 경우: ID만 저장했다가 나중에 스폰 후 적용
 	var holder_pending := _get_unit_node(unit_id)
 	if holder_pending == null:
 		_active_unit_id = unit_id
 		return
 
-	# 이전 활성 유닛 원복
-	if _active_unit_id != "":
-		var prev_holder := _get_unit_node(_active_unit_id)
-		if prev_holder:
-			var prev_outline: Sprite3D = prev_holder.get_node_or_null("Outline")
-			if prev_outline:
-				prev_outline.visible = false
-			if prev_holder.has_meta("base_scale"):
-				prev_holder.scale = prev_holder.get_meta("base_scale")
-			if prev_holder.has_meta("base_y"):
-				prev_holder.position.y = prev_holder.get_meta("base_y")
-
-	_active_unit_id = ""
-
-	# 새 유닛 활성화
-	var holder := holder_pending
-
-	var outline: Sprite3D = holder.get_node_or_null("Outline")
-	if outline:
-		outline.visible = true
+	# 턴이 돌아와도 강조가 남지 않도록 전체 Outline 초기화 후 active/target만 재적용
+	_clear_all_outlines()
 
 	_active_unit_id = unit_id
-	var base_scale: Vector3
-	if holder.has_meta("base_scale"):
-		base_scale = holder.get_meta("base_scale")
-	else:
-		base_scale = holder.scale
-	var base_y: float
-	if holder.has_meta("base_y"):
-		base_y = holder.get_meta("base_y")
-	else:
-		base_y = holder.position.y
+	var holder: Node3D = holder_pending
+	_set_outline_visible(holder, true)
+	_set_outline_color(holder, Color(1.0, 1.0, 0.2, 1.0))
 
-	var tween: Tween = create_tween()
-	tween.tween_property(holder, "scale", base_scale * 1.18, 0.12)
-	tween.parallel().tween_property(holder, "position:y", base_y + 0.15, 0.12)
+	# Attack 상태에서 선택된 타겟이 있으면 타겟 Outline 복원
+	if _target_unit_id != "":
+		var target_holder: Node3D = _get_unit_node(_target_unit_id)
+		if target_holder:
+			_set_outline_visible(target_holder, true)
+			_set_outline_color(target_holder, Color(1.0, 0.85, 0.15, 1.0))
 
 
 func clear_active_unit() -> void:
@@ -424,14 +384,31 @@ func clear_active_unit() -> void:
 		return
 	var holder := _get_unit_node(_active_unit_id)
 	if holder:
-		var outline: Sprite3D = holder.get_node_or_null("Outline")
-		if outline:
-			outline.visible = false
-		if holder.has_meta("base_scale"):
-			holder.scale = holder.get_meta("base_scale")
-		if holder.has_meta("base_y"):
-			holder.position.y = holder.get_meta("base_y")
+		_set_outline_visible(holder, false)
 	_active_unit_id = ""
+
+
+func set_target_unit(unit_id: String) -> void:
+	if unit_id == _target_unit_id:
+		return
+	if _target_unit_id != "":
+		var prev: Node3D = _get_unit_node(_target_unit_id)
+		if prev:
+			_set_outline_visible(prev, false)
+	_target_unit_id = unit_id
+	var holder: Node3D = _get_unit_node(unit_id)
+	if holder:
+		_set_outline_visible(holder, true)
+		_set_outline_color(holder, Color(1.0, 0.85, 0.15, 1.0))
+
+
+func clear_target_unit() -> void:
+	if _target_unit_id == "":
+		return
+	var holder := _get_unit_node(_target_unit_id)
+	if holder:
+		_set_outline_visible(holder, false)
+	_target_unit_id = ""
 
 
 func play_turn_started(unit_id: String) -> void:
@@ -471,11 +448,12 @@ func play_unit_defeated(unit_id: String) -> void:
 	var holder: Node3D = _get_unit_node(unit_id)
 	if holder == null:
 		return
-	var tween: Tween = create_tween()
-	tween.tween_property(holder, "scale", Vector3.ONE * 0.1, 0.25)
-	tween.parallel().tween_property(holder, "position:y", holder.position.y - 0.4, 0.25)
-	tween.tween_callback(func() -> void:
+	# 스케일/포지션 tween 없이 짧은 지연 후 제거만 수행
+	var id_for_callback: String = unit_id
+	var t: Tween = create_tween()
+	t.tween_interval(0.2)
+	t.tween_callback(func() -> void:
 		if is_instance_valid(holder):
 			holder.queue_free()
-		_unit_nodes.erase(unit_id)
+		_unit_nodes.erase(id_for_callback)
 	)

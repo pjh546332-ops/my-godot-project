@@ -43,10 +43,7 @@ func _setup_3d_units() -> void:
 		stage_3d.spawn_units_from_manager(battle_manager)
 		# 2D 타겟팅 화살표 노드 참조
 		targeting_arrow_2d = get_node_or_null("CanvasLayer/TargetingArrow2D") as Node2D
-		# 3D 유닛 클릭 → 스탯창 표시 연결 (중복 연결 방지)
-		if stage_3d.has_signal("unit_clicked"):
-			if not stage_3d.unit_clicked.is_connected(_on_unit_clicked):
-				stage_3d.unit_clicked.connect(_on_unit_clicked)
+		# 당분간 StatsPanel 완전 OFF: unit_clicked 연결하지 않음 (유닛 클릭해도 스탯창 미표시)
 		# 유닛 스폰 이후 현재 계획 유닛을 다시 3D 스테이지에 반영
 		if battle_manager.has_method("get_current_planning_unit") and stage_3d.has_method("set_active_unit"):
 			var u: BattleUnit = battle_manager.get_current_planning_unit()
@@ -141,10 +138,13 @@ func _on_state_changed(s: BattleManager.State) -> void:
 	)
 	if action_panel and action_panel.has_method("set_enabled"):
 		action_panel.set_enabled(show_panel)
-	# 조작 턴이 아닌 상태(EXECUTE/ROUND_END 등)에서는 3D 강조 해제
+	# 조작 턴이 아닌 상태(EXECUTE/ROUND_END 등)에서는 3D active 강조 해제
 	if stage_3d and stage_3d.has_method("clear_active_unit"):
 		if s == BattleManager.State.EXECUTE or s == BattleManager.State.ROUND_END:
 			stage_3d.clear_active_unit()
+	# 타겟 선택 모드에서 벗어나면 타겟 Outline 해제
+	if s != BattleManager.State.ALLY_SELECT_TARGET and stage_3d and stage_3d.has_method("clear_target_unit"):
+		stage_3d.clear_target_unit()
 
 
 func _on_current_planning_unit(unit: BattleUnit) -> void:
@@ -173,10 +173,6 @@ func _handle_reaction_async(attacker: BattleUnit, target: BattleUnit, base_damag
 	if not reaction_panel or not battle_manager:
 		battle_manager.continue_execute_phase()
 		return
-
-	# 리액션 시작 시 피격 대상에 "상태를 남기지 않는" 1회 펄스 연출만 적용
-	if stage_3d and stage_3d.has_method("pulse_once") and target:
-		stage_3d.pulse_once(target.name, true)
 
 	var reaction: ReactionTypes.Reaction = await reaction_panel.choose_reaction(attacker, target)
 	var result: Dictionary = ReactionResolver.resolve(attacker, target, base_damage, reaction)

@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://b4yi1nf87b2t7" path="res://Scripts/Battle/battle_manager.gd" id="1"]
 [ext_resource type="PackedScene" path="res://Scenes/Battle/BattleStage3D.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://Scenes/Battle/BattleUI.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://s0grv2ahh47s" path="res://Scenes/Battle/BattleUI.tscn" id="3"]
 [ext_resource type="Script" uid="uid://2kk1et6yk0xn" path="res://Scripts/Battle/battle_scene_3d.gd" id="4"]
 [ext_resource type="Script" uid="uid://frt8hpi2gsso" path="res://Scripts/Battle/battle_event_dispatcher.gd" id="5"]
 [ext_resource type="Script" uid="uid://cdg2xb5wo01ag" path="res://Scripts/Battle/battle_presenter_3d.gd" id="6"]
-[ext_resource type="Script" path="res://Scripts/UI/targeting_arrow_2d.gd" id="7"]
+[ext_resource type="Script" uid="uid://cec3swf3suwqx" path="res://Scripts/UI/targeting_arrow_2d.gd" id="7"]
 
 [node name="BattleScene3D" type="Node" unique_id=1765977175]
 script = ExtResource("4")
@@ -28,5 +28,5 @@ script = ExtResource("6")
 
 [node name="BattleUI" parent="CanvasLayer" unique_id=1984527709 instance=ExtResource("3")]
 
-[node name="TargetingArrow2D" type="Node2D" parent="CanvasLayer"]
+[node name="TargetingArrow2D" type="Node2D" parent="CanvasLayer" unique_id=36564204]
 script = ExtResource("7")
