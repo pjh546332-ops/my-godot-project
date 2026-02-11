@@ -4,17 +4,17 @@ extends Node3D
 ## 마우스 클릭으로 유닛 선택을 처리하는 컨트롤러.
 
 const ALLY_SLOTS: Array[Vector3] = [
-	Vector3(-2.0, 0.5, 1.0),
-	Vector3(-0.7, 0.5, 0.8),
-	Vector3(0.7, 0.5, 0.8),
-	Vector3(2.0, 0.5, 1.0),
+	Vector3(-3.5, 0.5, 0.6),
+	Vector3(-3.5, 0.5, 0.2),
+	Vector3(-3.5, 0.5, -0.2),
+	Vector3(-3.5, 0.5, -0.6),
 ]
 
 const ENEMY_SLOTS: Array[Vector3] = [
-	Vector3(-2.0, 0.5, -1.5),
-	Vector3(-0.7, 0.5, -1.8),
-	Vector3(0.7, 0.5, -1.8),
-	Vector3(2.0, 0.5, -1.5),
+	Vector3(3.5, 0.5, 0.6),
+	Vector3(3.5, 0.5, 0.2),
+	Vector3(3.5, 0.5, -0.2),
+	Vector3(3.5, 0.5, -0.6),
 ]
 
 @onready var units_root: Node3D = $StageRoot3D/Units
@@ -27,12 +27,15 @@ var _enemy_texture: Texture2D
 var _selected_unit: BattleUnit = null
 var _selection_ring: MeshInstance3D = null
 var _unit_nodes: Dictionary = {}
+var _manager: BattleManager = null
 
 
 func spawn_units_from_manager(manager: BattleManager) -> void:
 	## 기존 유닛 로직(BattleManager.get_all_units)에서 목록을 받아 3D 스테이지에 배치.
 	if not units_root or manager == null:
 		return
+
+	_manager = manager
 
 	_clear_units()
 	_clear_selection()
@@ -189,6 +192,14 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 
 	if holder == null:
 		_clear_selection()
+		return
+
+	# 3D에서 적 유닛을 클릭했을 때 타겟 선택 모드라면 BattleManager에 위임
+	if _manager != null \
+			and _manager._state == BattleManager.State.ALLY_SELECT_TARGET \
+			and unit.is_enemy() \
+			and unit.is_alive():
+		_manager.on_enemy_clicked(unit)
 		return
 
 	_set_selection(unit, holder.global_position)

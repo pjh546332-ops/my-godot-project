@@ -58,6 +58,11 @@ func _init_ui() -> void:
 		character_list.setup(battle_manager)
 	if action_panel and action_panel.has_method("setup"):
 		action_panel.setup(battle_manager)
+		# 버튼 시그널을 BattleManager에 연결 (중복 연결 방지)
+		if not action_panel.attack_pressed.is_connected(battle_manager.on_attack_pressed):
+			action_panel.attack_pressed.connect(battle_manager.on_attack_pressed)
+		if not action_panel.defend_pressed.is_connected(battle_manager.on_defend_pressed):
+			action_panel.defend_pressed.connect(battle_manager.on_defend_pressed)
 	if enemy_intent_ui and enemy_intent_ui.has_method("setup"):
 		enemy_intent_ui.setup(battle_manager)
 	if reaction_panel and reaction_panel.has_method("setup"):

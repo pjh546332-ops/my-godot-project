@@ -14,6 +14,8 @@ const HUB_SCENE := "res://Scenes/Hub/HubScene.tscn"
 const PREP_SCENE := "res://Scenes/DungeonPrep/DungeonPrepScene.tscn"
 const EXPLORE_SCENE := "res://Scenes/Explore/ExploreScene.tscn"
 const FIRST_PERSON_ROOM_SCENE := "res://Scenes/Explore/FirstPersonRoom.tscn"
+const DEV_MENU_SCENE := "res://Scenes/Dev/DevMenuScene.tscn"
+const BATTLE_SCENE_3D := "res://Scenes/Battle/BattleScene3D.tscn"
 
 const MODE_SCENES: Dictionary = {
 	GameMode.EXPLORE: EXPLORE_SCENE,
@@ -117,6 +119,16 @@ func switch_to(path: String) -> void:
 	if inst.has_signal("request_back_to_hub"):
 		inst.request_back_to_hub.connect(go_to_hub)
 
+	# Dev 메뉴에서 테스트 씬 요청 신호 연결
+	if inst.has_signal("request_test_battle_3d"):
+		inst.request_test_battle_3d.connect(_on_request_test_battle_3d)
+	if inst.has_signal("request_test_first_person_room"):
+		inst.request_test_first_person_room.connect(_on_request_test_first_person_room)
+	if inst.has_signal("request_test_hub"):
+		inst.request_test_hub.connect(_on_request_test_hub)
+	if inst.has_signal("request_test_explore_2d"):
+		inst.request_test_explore_2d.connect(_on_request_test_explore_2d)
+
 	# ExploreScene / FirstPersonRoom 루프 신호 연결
 	if inst.has_signal("request_enter_room"):
 		inst.request_enter_room.connect(_on_request_enter_room)
@@ -179,7 +191,15 @@ func start_new_game() -> void:
 	if _dungeon_map:
 		_dungeon_map.init_grid()
 
-	_start_prologue_intro()
+	_start_dev_menu()
+
+
+func _start_dev_menu() -> void:
+	print("[GameRoot] Start DevMenu")
+	_current_mode = GameMode.HUB  # Dev 메뉴는 HUB와 유사한 상태로 취급
+	if GameState:
+		GameState.current_mode = _mode_to_game_state_enum(_current_mode)
+	_fade_and_switch_to(DEV_MENU_SCENE)
 
 
 func _start_prologue_intro() -> void:
@@ -291,6 +311,30 @@ func _on_battle_ended(ally_won: bool) -> void:
 		if bm and "current_round" in bm:
 			rounds = bm.current_round
 	GameState.set_battle_result(ally_won, rounds)
+
+
+func _on_request_test_battle_3d() -> void:
+	print("[GameRoot] DevMenu: Test Battle 3D")
+	_current_mode = GameMode.BATTLE
+	_fade_and_switch_to(BATTLE_SCENE_3D)
+
+
+func _on_request_test_first_person_room() -> void:
+	print("[GameRoot] DevMenu: Test First Person Room")
+	_current_mode = GameMode.EXPLORE
+	_fade_and_switch_to(FIRST_PERSON_ROOM_SCENE)
+
+
+func _on_request_test_hub() -> void:
+	print("[GameRoot] DevMenu: Test Hub")
+	_current_mode = GameMode.HUB
+	_fade_and_switch_to(HUB_SCENE)
+
+
+func _on_request_test_explore_2d() -> void:
+	print("[GameRoot] DevMenu: Test Explore 2D")
+	_current_mode = GameMode.EXPLORE
+	_fade_and_switch_to(EXPLORE_SCENE)
 
 
 func _on_new_game_requested() -> void:
