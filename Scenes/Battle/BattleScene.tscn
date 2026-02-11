@@ -1,0 +1,199 @@
+[gd_scene format=3 uid="uid://cslj5sbnbespf"]
+
+[ext_resource type="Script" uid="uid://bi1gu18qmoqql" path="res://Scripts/Battle/battle_scene.gd" id="1_scene"]
+[ext_resource type="Script" uid="uid://b4yi1nf87b2t7" path="res://Scripts/Battle/battle_manager.gd" id="2_mgr"]
+[ext_resource type="Script" uid="uid://bvl6tlxj16hoo" path="res://Scripts/Battle/grid_display.gd" id="3_grid"]
+[ext_resource type="Script" uid="uid://lpdtn45fintp" path="res://Scripts/UI/turn_track.gd" id="4_turn"]
+[ext_resource type="Script" uid="uid://c4kbctp1rbomd" path="res://Scripts/UI/reaction_panel.gd" id="6_react"]
+[ext_resource type="PackedScene" uid="uid://cdttw50e6407w" path="res://Scenes/Battle/action_panel.tscn" id="6_slsav"]
+[ext_resource type="Script" uid="uid://cj0mfsi3nqivx" path="res://Scripts/UI/character_list.gd" id="7_char"]
+[ext_resource type="Script" uid="uid://cukidhd1sdmp7" path="res://Scripts/UI/enemy_intent_ui.gd" id="8_intent"]
+[ext_resource type="Script" uid="uid://b2i1s2bxcu3e3" path="res://Scripts/UI/stats_panel.gd" id="9_stats"]
+
+[node name="BattleScene" type="Node2D" unique_id=1071695629]
+script = ExtResource("1_scene")
+
+[node name="BattleScene#Stage" type="Node2D" parent="." unique_id=1704957996]
+
+[node name="BattleScene_Stage#Background" type="ColorRect" parent="." unique_id=2030427817]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.7
+color = Color(0.3, 0, 0.4, 1)
+
+[node name="BattleScene_Stage#StagePolygon" type="Polygon2D" parent="." unique_id=1530360080]
+color = Color(0.8, 0.1, 0.1, 1)
+
+[node name="BattleManager" type="Node" parent="." unique_id=1160298853]
+script = ExtResource("2_mgr")
+
+[node name="BoardRoot" type="Node2D" parent="." unique_id=930244757]
+scale = Vector2(0.6898192, 1.295203)
+
+[node name="AllyBoardRoot" type="Node2D" parent="BoardRoot" unique_id=1848424714]
+
+[node name="Grid" type="Node2D" parent="BoardRoot/AllyBoardRoot" unique_id=585717592]
+script = ExtResource("3_grid")
+
+[node name="UnitsRoot" type="Node2D" parent="BoardRoot/AllyBoardRoot" unique_id=371155503]
+
+[node name="EnemyBoardRoot" type="Node2D" parent="BoardRoot" unique_id=793711216]
+
+[node name="Grid" type="Node2D" parent="BoardRoot/EnemyBoardRoot" unique_id=749817145]
+script = ExtResource("3_grid")
+
+[node name="UnitsRoot" type="Node2D" parent="BoardRoot/EnemyBoardRoot" unique_id=53544594]
+
+[node name="BattleScene#UnitsLayer" type="Node2D" parent="." unique_id=1459973360]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=97528247]
+
+[node name="BottomUI" type="ColorRect" parent="CanvasLayer" unique_id=66872339]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -180.0
+color = Color(0.46666667, 0.4745098, 0.74509805, 0.5921569)
+
+[node name="StatsPanel" type="Control" parent="CanvasLayer" unique_id=637575645]
+visible = false
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 120.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("9_stats")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/StatsPanel" unique_id=1584736114]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="CanvasLayer/StatsPanel/VBox" unique_id=1288907624]
+layout_mode = 2
+text = "Unit"
+
+[node name="Stats" type="Label" parent="CanvasLayer/StatsPanel/VBox" unique_id=1688347285]
+layout_mode = 2
+text = "STR  AGI  INT  VIT"
+
+[node name="TurnTrack" type="HBoxContainer" parent="CanvasLayer" unique_id=609004370]
+offset_top = 8.0
+offset_right = 640.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("4_turn")
+
+[node name="Allies" type="HBoxContainer" parent="CanvasLayer/TurnTrack" unique_id=823341564]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Spacer" type="Control" parent="CanvasLayer/TurnTrack" unique_id=1399496017]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Enemies" type="HBoxContainer" parent="CanvasLayer/TurnTrack" unique_id=1184867231]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 4
+
+[node name="ActionPanel" parent="CanvasLayer" unique_id=591876452 instance=ExtResource("6_slsav")]
+
+[node name="EnemyIntentUI" type="VBoxContainer" parent="CanvasLayer" unique_id=426675537]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 48.0
+offset_bottom = 200.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("8_intent")
+
+[node name="Title" type="Label" parent="CanvasLayer/EnemyIntentUI" unique_id=331124203]
+layout_mode = 2
+text = "Enemy intent"
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/EnemyIntentUI" unique_id=634659713]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer" unique_id=1709696034]
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1126.0
+offset_top = 191.0
+offset_right = -826.0
+offset_bottom = 151.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Margin" unique_id=1349388992]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CharacterList" type="ScrollContainer" parent="CanvasLayer/Margin/VBox" unique_id=412227241]
+visible = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+script = ExtResource("7_char")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Margin/VBox/CharacterList" unique_id=1698826923]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReactionPanel" type="VBoxContainer" parent="CanvasLayer/Margin/VBox" unique_id=629011977]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("6_react")
+
+[node name="Desc" type="Label" parent="CanvasLayer/Margin/VBox/ReactionPanel" unique_id=36715448]
+layout_mode = 2
+text = "Reaction"
+
+[node name="HBox" type="HBoxContainer" parent="CanvasLayer/Margin/VBox/ReactionPanel" unique_id=541094636]
+layout_mode = 2
+
+[node name="Hold" type="Button" parent="CanvasLayer/Margin/VBox/ReactionPanel/HBox" unique_id=1755179357]
+layout_mode = 2
+text = "Hold"
+
+[node name="Dodge" type="Button" parent="CanvasLayer/Margin/VBox/ReactionPanel/HBox" unique_id=1612884120]
+layout_mode = 2
+text = "Dodge"
+
+[node name="Block" type="Button" parent="CanvasLayer/Margin/VBox/ReactionPanel/HBox" unique_id=1031307296]
+layout_mode = 2
+text = "Guard"
+
+[node name="Counter" type="Button" parent="CanvasLayer/Margin/VBox/ReactionPanel/HBox" unique_id=1072243666]
+layout_mode = 2
+text = "Counter"
+
+[node name="DeselectOverlay" type="ColorRect" parent="CanvasLayer" unique_id=1826274733]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.2)

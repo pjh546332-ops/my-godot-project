@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Map/dungeon_mini_map.gd" id="1"]
+
+[node name="DungeonMiniMap" type="Control"]
+script = ExtResource("1")
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -160.0
+offset_right = -16.0
+offset_bottom = -16.0
+

@@ -1,0 +1,35 @@
+{
+  "id": "preset_ring_01",
+  "grid_unit": 16,
+  "rooms": [
+    {"id":"START","pos":[0,0],"type":"START"},
+    {"id":"MID_CENTER","pos":[0,2],"type":"NORMAL"},
+    {"id":"MID_LEFT","pos":[-2,2],"type":"FIGHT"},
+    {"id":"MID_RIGHT","pos":[2,2],"type":"FIGHT"},
+    {"id":"OUTER_LEFT","pos":[-4,2],"type":"NORMAL"},
+    {"id":"OUTER_RIGHT","pos":[4,2],"type":"NORMAL"},
+    {"id":"TOP_LEFT","pos":[-2,4],"type":"EVENT"},
+    {"id":"BOSS","pos":[0,4],"type":"BOSS"}
+  ],
+  "edges": [
+    {"a":"START","b":"MID_CENTER","path":[[0,0],[0,1],[0,2]]},
+
+    {"a":"MID_CENTER","b":"BOSS","path":[[0,2],[0,3],[0,4]]},
+
+    {"a":"MID_CENTER","b":"MID_LEFT","path":[[0,2],[-1,2],[-2,2]]},
+    {"a":"MID_CENTER","b":"MID_RIGHT","path":[[0,2],[1,2],[2,2]]},
+
+    {"a":"MID_LEFT","b":"OUTER_LEFT","path":[[-2,2],[-3,2],[-4,2]]},
+    {"a":"MID_RIGHT","b":"OUTER_RIGHT","path":[[2,2],[3,2],[4,2]]},
+
+    {"a":"OUTER_LEFT","b":"TOP_LEFT","path":[[-4,2],[-4,3],[-4,4],[-3,4],[-2,4]]},
+
+    {"a":"TOP_LEFT","b":"BOSS","path":[[-2,4],[-1,4],[0,4]]},
+
+    {"a":"BOSS","b":"OUTER_RIGHT","path":[[0,4],[1,4],[2,4],[3,4],[4,4],[4,3],[4,2]]},
+
+    {"a":"OUTER_RIGHT","b":"START","path":[[4,2],[4,1],[4,0],[3,0],[2,0],[1,0],[0,0]]}
+  ],
+  "start_room_id": "START"
+}
+

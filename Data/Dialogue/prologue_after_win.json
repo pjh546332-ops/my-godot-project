@@ -1,0 +1,15 @@
+{
+  "id": "prologue_after_win",
+  "lines": [
+	{
+	  "name": "시아코",
+	  "text": "훌륭한 지휘였습니다.",
+	  "side": "right"
+	},
+	{
+	  "name": "주인공",
+	  "text": "어찌저찌 이겼구만..",
+	  "side": "left"
+	}
+  ]
+}

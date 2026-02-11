@@ -1,0 +1,129 @@
+[gd_scene load_steps=6 format=3 uid="uid://b8bqqvach6lio"]
+
+[ext_resource type="Script" uid="uid://cjvhmmur8qauh" path="res://Scripts/Explore/explore_scene.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://u6v3ejgnw0wa" path="res://Scripts/Explore/explore_manager.gd" id="2_manager"]
+[ext_resource type="Script" uid="uid://e848u8hjwddk" path="res://Scripts/Explore/room_view.gd" id="3_room"]
+[ext_resource type="Script" uid="uid://bwkendslrbl0c" path="res://Scripts/Explore/corridor_view.gd" id="4_corridor"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Map/DungeonMiniMap.tscn" id="5_minimap"]
+
+[node name="ExploreScene" type="Node2D" unique_id=1404574659]
+position = Vector2(566, 292)
+script = ExtResource("1_script")
+
+[node name="ExploreManager" type="Node" parent="." unique_id=1926609735]
+script = ExtResource("2_manager")
+
+[node name="RoomView" type="Control" parent="." unique_id=927965493]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 135.0
+offset_top = 81.0
+offset_right = 135.0
+offset_bottom = 81.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_room")
+metadata/_edit_use_anchors_ = true
+
+[node name="CorridorView" type="Control" parent="." unique_id=887539776]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_corridor")
+
+[node name="CameraFrame" type="Panel" parent="CorridorView" unique_id=2000000000]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -224.0
+offset_top = -128.0
+offset_right = 224.0
+offset_bottom = 128.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="World" type="Node2D" parent="CorridorView/CameraFrame" unique_id=2000000004]
+
+[node name="Floor" type="ColorRect" parent="CorridorView/CameraFrame/World" unique_id=2000000005]
+offset_left = -400.0
+offset_top = 80.0
+offset_right = 400.0
+offset_bottom = 260.0
+color = Color(0.12, 0.12, 0.16, 1)
+
+[node name="Bg" type="ColorRect" parent="CorridorView/CameraFrame/World" unique_id=2000000001]
+offset_left = -512.0
+offset_top = -64.0
+offset_right = 512.0
+offset_bottom = 80.0
+color = Color(0.1, 0.1, 0.14, 1)
+
+[node name="LeftDoorMarker" type="ColorRect" parent="CorridorView/CameraFrame/World" unique_id=2000000006]
+offset_left = -200.0
+offset_top = 20.0
+offset_right = -160.0
+offset_bottom = 80.0
+color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="RightDoorMarker" type="ColorRect" parent="CorridorView/CameraFrame/World" unique_id=2000000007]
+offset_left = 160.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 80.0
+color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Party" type="ColorRect" parent="CorridorView/CameraFrame" unique_id=2000000003]
+layout_mode = 0
+offset_left = -12.0
+offset_top = -24.0
+offset_right = 12.0
+offset_bottom = 24.0
+color = Color(0.9, 0.9, 1, 1)
+
+[node name="UIOverlay" type="Control" parent="CorridorView" unique_id=2000000008]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CorridorView/UIOverlay" unique_id=1002302610]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 216.0
+offset_bottom = 120.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="DebugLabel" type="Label" parent="CorridorView/UIOverlay/VBoxContainer" unique_id=507299032]
+visible = false
+layout_mode = 2
+text = "Direction"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="CorridorView/UIOverlay/VBoxContainer" unique_id=1707782022]
+layout_mode = 2
+
+[node name="ArrivedLabel" type="Label" parent="CorridorView/UIOverlay/VBoxContainer" unique_id=1339304551]
+visible = false
+layout_mode = 2
+text = "ARRIVED!"
+
+[node name="StressLabel" type="Label" parent="CorridorView/UIOverlay/VBoxContainer" unique_id=1339304552]
+layout_mode = 2
+text = "Stress: 0"
+
+[node name="DungeonMiniMap" parent="." instance=ExtResource("5_minimap")]

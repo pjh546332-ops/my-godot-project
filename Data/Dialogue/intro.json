@@ -1,0 +1,35 @@
+{
+  "id": "intro",
+  "lines": [
+	{
+	  "name": "???",
+	  "text": "...",
+	  "side": "left"
+	},
+	{
+	  "name": "???",
+	  "text": "젠장... 이게 무슨...",
+	  "side": "left"
+	},
+	{
+	  "name": "???",
+	  "text": "...님!.",
+	  "side": "right"
+	},
+	{
+	  "name": "???",
+	  "text": "...자님!.",
+	  "side": "right"
+	},
+	{
+	  "name": "???",
+	  "text": "관리자님!",
+	  "side": "right"
+	},
+	{
+	  "name": "???",
+	  "text": "괜찮으신가요?",
+	  "side": "right"
+	}
+  ]
+}

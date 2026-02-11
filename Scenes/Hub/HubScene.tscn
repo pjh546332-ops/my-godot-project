@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://dajau2bhkw642"]
+
+[ext_resource type="Script" uid="uid://bphalxlv4n4sv" path="res://Scripts/Hub/hub_scene.gd" id="1_script"]
+
+[node name="HubScene" type="Node2D" unique_id=392858288]
+script = ExtResource("1_script")
+
+[node name="HubUI" type="Control" parent="." unique_id=9663754]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="RootHBox" type="HBoxContainer" parent="HubUI" unique_id=1745334070]
+layout_direction = 1
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 458.0
+offset_top = 140.0
+offset_right = 743.0
+offset_bottom = 468.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="SideMenuPanel" type="PanelContainer" parent="HubUI/RootHBox" unique_id=1701873629]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SideMargin" type="MarginContainer" parent="HubUI/RootHBox/SideMenuPanel" unique_id=1457397641]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="SideVBox" type="VBoxContainer" parent="HubUI/RootHBox/SideMenuPanel/SideMargin" unique_id=317903269]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DungeonButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=2020899634]
+layout_mode = 2
+text = "던전 (탐색)"
+
+[node name="HubPartyButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=68558821]
+layout_mode = 2
+text = "거점/파티 (캐릭터 관리)"
+
+[node name="ShopButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1317433987]
+layout_mode = 2
+text = "상점 (판매/구매)"
+
+[node name="ManagementButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1747418190]
+layout_mode = 2
+text = "관리 (건물 업그레이드)"
+
+[node name="GardenButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1484721530]
+layout_mode = 2
+text = "정원 (이벤트/버프)"
+
+[node name="LibraryButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1890603741]
+layout_mode = 2
+text = "도서관 (이벤트 다시보기/문서)"
+
+[node name="RestButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1260827141]
+layout_mode = 2
+text = "휴식 (회복/정비)"
+
+[node name="StorageButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1959175541]
+layout_mode = 2
+text = "창고 (인벤토리/장비)"
+
+[node name="ContentPanel" type="PanelContainer" parent="HubUI/RootHBox" unique_id=1857295032]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ContentMargin" type="MarginContainer" parent="HubUI/RootHBox/ContentPanel" unique_id=18149766]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="SubViewHost" type="Control" parent="HubUI/RootHBox/ContentPanel/ContentMargin" unique_id=844980621]
+layout_mode = 2

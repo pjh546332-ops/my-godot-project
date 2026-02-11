@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cdttw50e6407w"]
+
+[ext_resource type="Script" uid="uid://y37pdx40rwqm" path="res://Scripts/UI/action_panel.gd" id="1_hlgvw"]
+
+[node name="ActionPanel" type="VBoxContainer" unique_id=591876452]
+offset_left = 1519.0
+offset_top = 954.0
+offset_right = 1885.0
+offset_bottom = 1047.0
+mouse_filter = 0
+script = ExtResource("1_hlgvw")
+
+[node name="HBox" type="HBoxContainer" parent="." unique_id=434057237]
+layout_mode = 2
+
+[node name="AttackButton" type="Button" parent="HBox" unique_id=1351578113]
+layout_mode = 2
+text = "Attack"
+
+[node name="DefendButton" type="Button" parent="HBox" unique_id=624322840]
+layout_mode = 2
+text = "Defend"
+
+[node name="SkillRow" type="HBoxContainer" parent="." unique_id=245329836]
+layout_mode = 2
+
+[node name="Skill1Button" type="Button" parent="SkillRow" unique_id=3954598]
+layout_mode = 2
+text = "Skill 1"
+
+[node name="Skill2Button" type="Button" parent="SkillRow" unique_id=1929328141]
+layout_mode = 2
+text = "Skill 2"
+
+[node name="Skill3Button" type="Button" parent="SkillRow" unique_id=1322190879]
+layout_mode = 2
+text = "Skill 3"
+
+[node name="TargetLabel" type="Label" parent="." unique_id=60450946]
+layout_mode = 2
