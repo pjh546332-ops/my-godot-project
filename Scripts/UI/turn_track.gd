@@ -5,12 +5,13 @@ extends Control
 var battle_manager: BattleManager
 var _track_items: Dictionary = {}  # BattleUnit -> PanelContainer
 var _active_unit: BattleUnit = null
-var _slots: Array[Control] = []  # 고정 슬롯 13개 (인덱스 0=왼끝, 6=중앙, 12=오른끝)
-var _slots_container: HBoxContainer = null
+var _ally_slots: Array[Control] = []
+var _enemy_slots: Array[Control] = []
+var _ally_container: HBoxContainer = null
+var _enemy_container: HBoxContainer = null
 
 const PORTRAIT_SIZE := 24
-const SLOT_COUNT := 13
-const CENTER_SLOT_INDEX := 6  # 0-based, 13개면 6이 중앙
+const SLOT_COUNT_SIDE := 7
 
 func set_active_unit_by_ref(unit: BattleUnit) -> void:
 	_apply_highlight(_active_unit, false)
@@ -30,58 +31,128 @@ func setup(p_battle_manager: BattleManager) -> void:
 	_refresh()
 
 func _build_fixed_slots() -> void:
-	# 기존 자식 제거 후 단일 HBoxContainer + 13 슬롯 생성
+	# 기존 자식 제거 후 상단 중앙 배치용 루트 컨테이너와 좌/우 슬롯 컨테이너 생성
 	for c in get_children():
 		c.queue_free()
-	_slots.clear()
-	_slots_container = HBoxContainer.new()
-	_slots_container.name = "SlotsContainer"
-	_slots_container.add_theme_constant_override("separation", 4)
-	_slots_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	add_child(_slots_container)
-	for i in SLOT_COUNT:
-		var slot: Control = PanelContainer.new()
-		slot.name = "Slot_%d" % i
-		slot.custom_minimum_size = Vector2(PORTRAIT_SIZE + 28, PORTRAIT_SIZE + 4)
-		slot.visible = false
-		_slots_container.add_child(slot)
-		_slots.append(slot)
+	_ally_slots.clear()
+	_enemy_slots.clear()
+
+	# 상단 중앙 배치
+	anchor_left = 0.5
+	anchor_right = 0.5
+	anchor_top = 0.0
+	anchor_bottom = 0.0
+	offset_left = -300.0
+	offset_right = 300.0
+	offset_top = 10.0
+	offset_bottom = 50.0
+
+	var root := HBoxContainer.new()
+	root.name = "TrackRoot"
+	root.anchor_left = 0.0
+	root.anchor_top = 0.0
+	root.anchor_right = 1.0
+	root.anchor_bottom = 1.0
+	root.offset_left = 0.0
+	root.offset_top = 0.0
+	root.offset_right = 0.0
+	root.offset_bottom = 0.0
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_theme_constant_override("separation", 40)
+	add_child(root)
+
+	_ally_container = HBoxContainer.new()
+	_ally_container.name = "AllySlots"
+	_ally_container.alignment = BoxContainer.ALIGNMENT_END
+	_ally_container.add_theme_constant_override("separation", 4)
+	root.add_child(_ally_container)
+
+	var spacer := Control.new()
+	spacer.name = "CenterSpacer"
+	spacer.custom_minimum_size = Vector2(40, PORTRAIT_SIZE + 4)
+	root.add_child(spacer)
+
+	_enemy_container = HBoxContainer.new()
+	_enemy_container.name = "EnemySlots"
+	_enemy_container.alignment = BoxContainer.ALIGNMENT_BEGIN
+	_enemy_container.add_theme_constant_override("separation", 4)
+	root.add_child(_enemy_container)
+
+	for i in SLOT_COUNT_SIDE:
+		var a_slot: Control = PanelContainer.new()
+		a_slot.name = "AllySlot_%d" % i
+		a_slot.custom_minimum_size = Vector2(PORTRAIT_SIZE + 28, PORTRAIT_SIZE + 4)
+		a_slot.visible = false
+		_ally_container.add_child(a_slot)
+		_ally_slots.append(a_slot)
+
+	for j in SLOT_COUNT_SIDE:
+		var e_slot: Control = PanelContainer.new()
+		e_slot.name = "EnemySlot_%d" % j
+		e_slot.custom_minimum_size = Vector2(PORTRAIT_SIZE + 28, PORTRAIT_SIZE + 4)
+		e_slot.visible = false
+		_enemy_slots.append(e_slot)
+		_enemy_container.add_child(e_slot)
 
 func _refresh(_arg: Variant = null) -> void:
-	if not battle_manager or _slots.is_empty():
+	if not battle_manager:
 		return
 	_track_items.clear()
+
 	# 모든 슬롯 비우고 숨김
-	for slot in _slots:
+	for slot in _ally_slots:
 		for c in slot.get_children():
 			c.queue_free()
 		slot.visible = false
 		_set_panel_style(slot as PanelContainer, false)
-	# 전체 유닛을 speed 내림차순(가장 빠른 것 먼저)
-	var units: Array[BattleUnit] = []
-	for u in battle_manager.ally_units_sorted:
-		if u.is_alive():
-			units.append(u)
-	for u in battle_manager.enemy_units:
-		if u.is_alive():
-			units.append(u)
-	units.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
+	for slot in _enemy_slots:
+		for c in slot.get_children():
+			c.queue_free()
+		slot.visible = false
+		_set_panel_style(slot as PanelContainer, false)
+
+	# 아군 / 적 유닛을 별도로 speed 내림차순 정렬
+	var allies: Array[BattleUnit] = []
+	for a in battle_manager.ally_units_sorted:
+		if a.is_alive():
+			allies.append(a)
+	allies.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
 		if a.speed != b.speed:
 			return a.speed > b.speed
 		return a.name < b.name
 	)
-	# 배치 순서: 중앙 → 오른쪽 → 왼쪽 → … (인덱스: 6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 12, 0)
-	var slot_order: Array[int] = [6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 12, 0]
-	for i in range(units.size()):
-		if i >= SLOT_COUNT:
-			break
-		var slot_idx: int = slot_order[i]
-		var u: BattleUnit = units[i]
+
+	var enemies: Array[BattleUnit] = []
+	for e in battle_manager.enemy_units:
+		if e.is_alive():
+			enemies.append(e)
+	enemies.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
+		if a.speed != b.speed:
+			return a.speed > b.speed
+		return a.name < b.name
+	)
+
+	# 아군: 오른쪽(중앙 쪽) 슬롯부터 빠른 유닛 배치
+	var ally_count: int = min(allies.size(), SLOT_COUNT_SIDE)
+	for i in range(ally_count):
+		var u: BattleUnit = allies[i]
+		var slot_idx: int = SLOT_COUNT_SIDE - 1 - i
+		var slot: Control = _ally_slots[slot_idx] as Control
 		var panel: PanelContainer = _make_track_item(u)
 		_track_items[u] = panel
-		var slot: Control = _slots[slot_idx]
 		slot.add_child(panel)
 		slot.visible = true
+
+	# 적: 왼쪽(중앙 쪽) 슬롯부터 빠른 유닛 배치
+	var enemy_count: int = min(enemies.size(), SLOT_COUNT_SIDE)
+	for j in range(enemy_count):
+		var eu: BattleUnit = enemies[j]
+		var eslot: Control = _enemy_slots[j] as Control
+		var epanel: PanelContainer = _make_track_item(eu)
+		_track_items[eu] = epanel
+		eslot.add_child(epanel)
+		eslot.visible = true
+
 	set_active_unit_by_ref(battle_manager._current_planning_unit())
 
 func _make_track_item(u: BattleUnit) -> PanelContainer:

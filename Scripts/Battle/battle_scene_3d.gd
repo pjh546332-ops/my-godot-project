@@ -173,6 +173,11 @@ func _handle_reaction_async(attacker: BattleUnit, target: BattleUnit, base_damag
 	if not reaction_panel or not battle_manager:
 		battle_manager.continue_execute_phase()
 		return
+
+	# 리액션 시작 시 피격 대상에 "상태를 남기지 않는" 1회 펄스 연출만 적용
+	if stage_3d and stage_3d.has_method("pulse_once") and target:
+		stage_3d.pulse_once(target.name, true)
+
 	var reaction: ReactionTypes.Reaction = await reaction_panel.choose_reaction(attacker, target)
 	var result: Dictionary = ReactionResolver.resolve(attacker, target, base_damage, reaction)
 	battle_manager.apply_reaction_damage(attacker, target, result)
@@ -225,14 +230,32 @@ func _process(_delta: float) -> void:
 
 
 func set_selected_unit(unit: BattleUnit) -> void:
+	# 토글: 같은 유닛을 다시 클릭하면 스탯창 닫기
+	if unit == null:
+		selected_unit = null
+		if stats_panel:
+			stats_panel.visible = false
+			stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if deselect_overlay:
+			deselect_overlay.visible = false
+		return
+
+	if selected_unit == unit and stats_panel and stats_panel.visible:
+		selected_unit = null
+		stats_panel.visible = false
+		if deselect_overlay:
+			deselect_overlay.visible = false
+		return
+
+	# 새 유닛 선택
 	selected_unit = unit
 	if stats_panel:
-		if unit and stats_panel.has_method("update"):
+		if stats_panel.has_method("update"):
 			stats_panel.update(unit)
-		stats_panel.visible = (unit != null)
+		stats_panel.visible = true
 		stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if deselect_overlay:
-		deselect_overlay.visible = (unit != null)
+		deselect_overlay.visible = true
 
 
 func _on_deselect_overlay_gui_input(event: InputEvent) -> void:

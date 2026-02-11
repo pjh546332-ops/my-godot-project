@@ -214,14 +214,32 @@ func is_target_select_mode() -> bool:
 	return battle_manager != null and battle_manager._state == BattleManager.State.ALLY_SELECT_TARGET
 
 func set_selected_unit(unit: BattleUnit) -> void:
+	# 토글: 같은 유닛을 다시 클릭하면 스탯창 닫기
+	if unit == null:
+		selected_unit = null
+		if stats_panel:
+			stats_panel.visible = false
+			stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if deselect_overlay:
+			deselect_overlay.visible = false
+		return
+
+	if selected_unit == unit and stats_panel and stats_panel.visible:
+		selected_unit = null
+		stats_panel.visible = false
+		if deselect_overlay:
+			deselect_overlay.visible = false
+		return
+
+	# 새 유닛 선택
 	selected_unit = unit
 	if stats_panel:
-		stats_panel.visible = false  # MVP: 스탯 창 비표시
-		stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		if unit and stats_panel.has_method("update"):
+		if stats_panel.has_method("update"):
 			stats_panel.update(unit)
+		stats_panel.visible = true
+		stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if deselect_overlay:
-		deselect_overlay.visible = (unit != null)
+		deselect_overlay.visible = true
 
 func _on_deselect_overlay_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

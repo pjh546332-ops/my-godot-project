@@ -214,11 +214,6 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 	query.collision_mask = 2
 	var result: Dictionary = space_state.intersect_ray(query)
 	var hit_collider: Object = result.get("collider", null)
-	var hit_name: String = ""
-	if hit_collider != null and hit_collider is Node:
-		hit_name = (hit_collider as Node).name
-	else:
-		hit_name = str(hit_collider)
 	print("[PICK] collider=", str(result.get("collider")))
 	if result.is_empty():
 		_clear_selection()
@@ -249,17 +244,17 @@ func _perform_unit_pick(screen_pos: Vector2) -> void:
 		_clear_selection()
 		return
 
-	# 타겟 선택 모드에서는 적 클릭을 BattleManager에 전달하고, 선택 표시/스탯창 갱신
+	# 타겟 선택 모드에서는 적 클릭을 BattleManager에만 전달하고, 선택 링만 표시
+	# (unit_clicked 시그널은 emit 하지 않아 StatsPanel이 뜨지 않도록 한다)
 	if _manager != null and _manager._state == BattleManager.State.ALLY_SELECT_TARGET:
 		if unit.is_enemy() and unit.is_alive():
 			_manager.on_enemy_clicked(unit)
 			_set_selection(unit, holder.global_position)
-			unit_clicked.emit(unit)
 			return
 
-	# 그 외 상태에서는 단순 선택 링 + 스탯창 갱신
+	# 그 외 상태에서도 현재는 StatsPanel 기능을 완전히 OFF 하기 위해
+	# unit_clicked 시그널을 emit 하지 않는다. 선택 링만 갱신.
 	_set_selection(unit, holder.global_position)
-	unit_clicked.emit(unit)
 
 
 func _ensure_selection_ring() -> void:
@@ -303,6 +298,49 @@ func _get_unit_node(unit_id: String) -> Node3D:
 		_unit_nodes.erase(unit_id)
 		return null
 	return node
+
+
+func _restore_holder_to_base(holder: Node3D) -> void:
+	if holder.has_meta("base_scale"):
+		holder.scale = holder.get_meta("base_scale")
+	if holder.has_meta("base_y"):
+		holder.position.y = holder.get_meta("base_y")
+
+
+## 리액션 등에서 "상태를 남기지 않는" 1회 펄스 연출
+func pulse_once(unit_id: String, with_outline: bool = false) -> void:
+	var holder := _get_unit_node(unit_id)
+	if holder == null:
+		return
+
+	_restore_holder_to_base(holder)
+
+	var outline: Sprite3D = holder.get_node_or_null("Outline")
+	if with_outline and outline:
+		outline.visible = true
+
+	var base_scale: Vector3
+	if holder.has_meta("base_scale"):
+		base_scale = holder.get_meta("base_scale")
+	else:
+		base_scale = holder.scale
+
+	var base_y: float
+	if holder.has_meta("base_y"):
+		base_y = holder.get_meta("base_y")
+	else:
+		base_y = holder.position.y
+
+	var tween: Tween = create_tween()
+	tween.tween_property(holder, "scale", base_scale * 1.18, 0.12)
+	tween.parallel().tween_property(holder, "position:y", base_y + 0.15, 0.12)
+	tween.tween_property(holder, "scale", base_scale, 0.12)
+	tween.parallel().tween_property(holder, "position:y", base_y, 0.12)
+	tween.tween_callback(func() -> void:
+		_restore_holder_to_base(holder)
+		if with_outline and outline and is_instance_valid(outline):
+			outline.visible = false
+	)
 
 
 func update_hp_label(unit_id: String) -> void:
