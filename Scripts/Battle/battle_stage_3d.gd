@@ -143,7 +143,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
 			return
 
-		if get_viewport().gui_is_control_under_mouse():
+		if get_viewport().gui_get_hovered_control() != null:
 			return
 
 		_perform_unit_pick(mb.position)
