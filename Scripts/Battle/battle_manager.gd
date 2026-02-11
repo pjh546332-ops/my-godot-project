@@ -78,7 +78,9 @@ func _init_units() -> void:
 	e3.cell = Vector2i(6, 3)
 	var e4 := BattleUnit.new("E4", BattleUnit.Team.ENEMY)
 	e4.cell = Vector2i(7, 3)
-	enemy_units.assign([e1, e2, e3, e4])
+	var e5 := BattleUnit.new("E5", BattleUnit.Team.ENEMY)
+	e5.cell = Vector2i(8, 3)
+	enemy_units.assign([e1, e2, e3, e4, e5])
 
 static func _speed_bonus(cell: Vector2i) -> int:
 	if cell.y == 0:

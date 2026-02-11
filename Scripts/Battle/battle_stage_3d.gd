@@ -4,17 +4,19 @@ extends Node3D
 ## 마우스 클릭으로 유닛 선택을 처리하는 컨트롤러.
 
 const ALLY_SLOTS: Array[Vector3] = [
-	Vector3(-3.5, 0.5, 0.6),
-	Vector3(-3.5, 0.5, 0.2),
-	Vector3(-3.5, 0.5, -0.2),
-	Vector3(-3.5, 0.5, -0.6),
+	Vector3(-6.0, 0.5, 1.4),  # 위-바깥
+	Vector3(-4.8, 0.5, 0.7),  # 위-안쪽
+	Vector3(-3.6, 0.5, 0.0),  # 화살촉(가장 오른쪽)
+	Vector3(-4.8, 0.5, -0.7), # 아래-안쪽
+	Vector3(-6.0, 0.5, -1.4), # 아래-바깥
 ]
 
 const ENEMY_SLOTS: Array[Vector3] = [
-	Vector3(3.5, 0.5, 0.6),
-	Vector3(3.5, 0.5, 0.2),
-	Vector3(3.5, 0.5, -0.2),
-	Vector3(3.5, 0.5, -0.6),
+	Vector3(6.0, 0.5, 1.4),   # 위-바깥
+	Vector3(4.8, 0.5, 0.7),   # 위-안쪽
+	Vector3(3.6, 0.5, 0.0),   # 화살촉(가장 왼쪽)
+	Vector3(4.8, 0.5, -0.7),  # 아래-안쪽
+	Vector3(6.0, 0.5, -1.4),  # 아래-바깥
 ]
 
 @onready var units_root: Node3D = $StageRoot3D/Units
@@ -28,6 +30,17 @@ var _selected_unit: BattleUnit = null
 var _selection_ring: MeshInstance3D = null
 var _unit_nodes: Dictionary = {}
 var _manager: BattleManager = null
+var _active_unit_id: String = ""
+var _active_base_scale: Vector3 = Vector3.ONE
+var _active_base_y: float = 0.0
+
+
+func _ready() -> void:
+	## 카메라를 약 45도 내려다보는 시점으로 설정
+	if camera_3d:
+		camera_3d.global_position = Vector3(0.0, 9.0, 9.0)
+		camera_3d.look_at(Vector3(0.0, 0.8, 0.0), Vector3.UP)
+		camera_3d.fov = 55.0
 
 
 func spawn_units_from_manager(manager: BattleManager) -> void:
@@ -68,6 +81,7 @@ func spawn_units_from_manager(manager: BattleManager) -> void:
 
 
 func _clear_units() -> void:
+	clear_active_unit()
 	for c in units_root.get_children():
 		c.queue_free()
 	_unit_nodes.clear()
@@ -118,7 +132,18 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	area.add_child(shape)
 	holder.add_child(area)
 
-	## 실제 표시용 Sprite3D
+	## 아웃라인 Sprite3D (노란 테두리, 기본 비활성)
+	var outline := Sprite3D.new()
+	outline.name = "Outline"
+	outline.texture = tex
+	outline.modulate = Color(1.0, 1.0, 0.2, 1.0)
+	outline.pixel_size = 0.01
+	outline.position = Vector3(0, 0.8, 0)
+	outline.scale = Vector3(1.12, 1.12, 1.0)
+	outline.visible = false
+	holder.add_child(outline)
+
+	## 실제 표시용 Sprite3D (아웃라인 위에 렌더되도록 나중에 추가)
 	var sprite := Sprite3D.new()
 	sprite.name = "Sprite"
 	sprite.texture = tex
@@ -248,14 +273,54 @@ func _get_unit_node(unit_id: String) -> Node3D:
 	return node
 
 
-func play_turn_started(unit_id: String) -> void:
-	var holder: Node3D = _get_unit_node(unit_id)
+func set_active_unit(unit_id: String) -> void:
+	# 이전 활성 유닛 원복
+	if _active_unit_id != "":
+		var prev_holder := _get_unit_node(_active_unit_id)
+		if prev_holder:
+			var prev_outline: Sprite3D = prev_holder.get_node_or_null("Outline")
+			if prev_outline:
+				prev_outline.visible = false
+			prev_holder.scale = _active_base_scale
+			prev_holder.position.y = _active_base_y
+
+	_active_unit_id = ""
+
+	# 새 유닛 활성화
+	var holder := _get_unit_node(unit_id)
 	if holder == null:
 		return
-	var base_pos: Vector3 = holder.position
+
+	var outline: Sprite3D = holder.get_node_or_null("Outline")
+	if outline:
+		outline.visible = true
+
+	_active_unit_id = unit_id
+	_active_base_scale = holder.scale
+	_active_base_y = holder.position.y
+
 	var tween: Tween = create_tween()
-	tween.tween_property(holder, "position:y", base_pos.y + 0.25, 0.08)
-	tween.tween_property(holder, "position:y", base_pos.y, 0.08)
+	tween.tween_property(holder, "scale", _active_base_scale * 1.18, 0.12)
+	tween.parallel().tween_property(holder, "position:y", _active_base_y + 0.15, 0.12)
+
+
+func clear_active_unit() -> void:
+	if _active_unit_id == "":
+		return
+	var holder := _get_unit_node(_active_unit_id)
+	if holder:
+		var outline: Sprite3D = holder.get_node_or_null("Outline")
+		if outline:
+			outline.visible = false
+		holder.scale = _active_base_scale
+		holder.position.y = _active_base_y
+	_active_unit_id = ""
+	_active_base_scale = Vector3.ONE
+	_active_base_y = 0.0
+
+
+func play_turn_started(unit_id: String) -> void:
+	set_active_unit(unit_id)
 
 
 func play_action_resolved(attacker_id: String, target_id: String, amount: int) -> void:

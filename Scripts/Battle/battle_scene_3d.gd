@@ -106,6 +106,10 @@ func _on_state_changed(s: BattleManager.State) -> void:
 	)
 	if action_panel and action_panel.has_method("set_enabled"):
 		action_panel.set_enabled(show_panel)
+	# 조작 턴이 아닌 상태(EXECUTE/ROUND_END 등)에서는 3D 강조 해제
+	if stage_3d and stage_3d.has_method("clear_active_unit"):
+		if s == BattleManager.State.EXECUTE or s == BattleManager.State.ROUND_END:
+			stage_3d.clear_active_unit()
 
 
 func _on_current_planning_unit(unit: BattleUnit) -> void:
@@ -113,6 +117,13 @@ func _on_current_planning_unit(unit: BattleUnit) -> void:
 		turn_track.set_active_unit_by_ref(unit)
 	if action_panel and action_panel.has_method("set_enabled"):
 		action_panel.set_enabled(unit != null and unit.is_ally())
+	# 현재 계획/행동 중인 유닛을 3D 스테이지에서 강조
+	if stage_3d and stage_3d.has_method("set_active_unit"):
+		if unit != null:
+			stage_3d.set_active_unit(unit.name)
+		else:
+			if stage_3d.has_method("clear_active_unit"):
+				stage_3d.clear_active_unit()
 
 
 func set_selected_unit(unit: BattleUnit) -> void:
