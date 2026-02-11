@@ -20,6 +20,7 @@ var reaction_panel: Control = null
 var bottom_ui: ColorRect = null
 
 var selected_unit: BattleUnit = null
+var targeting_arrow_2d: Node2D = null
 
 
 func _ready() -> void:
@@ -40,6 +41,12 @@ func _setup_3d_units() -> void:
 		return
 	if stage_3d.has_method("spawn_units_from_manager"):
 		stage_3d.spawn_units_from_manager(battle_manager)
+		# 2D 타겟팅 화살표 노드 참조
+		targeting_arrow_2d = get_node_or_null("CanvasLayer/TargetingArrow2D") as Node2D
+		# 3D 유닛 클릭 → 스탯창 표시 연결 (중복 연결 방지)
+		if stage_3d.has_signal("unit_clicked"):
+			if not stage_3d.unit_clicked.is_connected(_on_unit_clicked):
+				stage_3d.unit_clicked.connect(_on_unit_clicked)
 		# 유닛 스폰 이후 현재 계획 유닛을 다시 3D 스테이지에 반영
 		if battle_manager.has_method("get_current_planning_unit") and stage_3d.has_method("set_active_unit"):
 			var u: BattleUnit = battle_manager.get_current_planning_unit()
@@ -130,9 +137,6 @@ func _on_state_changed(s: BattleManager.State) -> void:
 	if stage_3d and stage_3d.has_method("clear_active_unit"):
 		if s == BattleManager.State.EXECUTE or s == BattleManager.State.ROUND_END:
 			stage_3d.clear_active_unit()
-	# 타겟팅 모드 토글
-	if stage_3d and stage_3d.has_method("set_targeting_mode"):
-		stage_3d.set_targeting_mode(s == BattleManager.State.ALLY_SELECT_TARGET)
 
 
 func _on_current_planning_unit(unit: BattleUnit) -> void:
@@ -177,13 +181,48 @@ func _on_unit_died(unit: BattleUnit) -> void:
 		stage_3d.update_hp_label(unit.name)
 
 
+func _on_unit_clicked(unit: BattleUnit) -> void:
+	# 3D 유닛 클릭을 공통 선택 처리로 위임
+	set_selected_unit(unit)
+
+
+func _process(_delta: float) -> void:
+	if not battle_manager or not stage_3d or not targeting_arrow_2d:
+		return
+
+	var targeting: bool = (battle_manager._state == BattleManager.State.ALLY_SELECT_TARGET)
+	if not targeting:
+		if targeting_arrow_2d.has_method("set_enabled"):
+			targeting_arrow_2d.set_enabled(false)
+		return
+
+	if not stage_3d.has_method("get_active_unit_head_world_pos"):
+		return
+	var head_world: Vector3 = stage_3d.get_active_unit_head_world_pos()
+	if head_world == Vector3.ZERO:
+		if targeting_arrow_2d.has_method("set_enabled"):
+			targeting_arrow_2d.set_enabled(false)
+		return
+
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var start_screen: Vector2 = cam.unproject_position(head_world)
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+
+	if targeting_arrow_2d.has_method("set_enabled"):
+		targeting_arrow_2d.set_enabled(true)
+	if targeting_arrow_2d.has_method("set_points"):
+		targeting_arrow_2d.set_points(start_screen, mouse_pos)
+
+
 func set_selected_unit(unit: BattleUnit) -> void:
 	selected_unit = unit
 	if stats_panel:
-		stats_panel.visible = false  # MVP: 스탯 창 비표시 (2D와 동일)
-		stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		if unit and stats_panel.has_method("update"):
 			stats_panel.update(unit)
+		stats_panel.visible = (unit != null)
+		stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if deselect_overlay:
 		deselect_overlay.visible = (unit != null)
 

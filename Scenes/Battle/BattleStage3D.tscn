@@ -1,4 +1,4 @@
-[gd_scene format=3 load_steps=9]
+[gd_scene format=3 load_steps=6]
 
 [ext_resource type="Script" path="res://Scripts/Battle/battle_stage_3d.gd" id="1"]
 
@@ -12,20 +12,6 @@ albedo_color = Color(0.18, 0.18, 0.22, 1)
 ambient_light_source = 1
 ambient_light_color = Color(0.4, 0.4, 0.5, 1)
 ambient_light_energy = 1.0
-
-[sub_resource type="CylinderMesh" id=4]
-top_radius = 0.03
-bottom_radius = 0.03
-height = 1.0
-
-[sub_resource type="CylinderMesh" id=5]
-top_radius = 0.0
-bottom_radius = 0.09
-height = 0.25
-
-[sub_resource type="StandardMaterial3D" id=6]
-albedo_color = Color(1, 0.95, 0.3, 1)
-flags_unshaded = true
 
 [node name="BattleStage3D" type="Node3D"]
 script = ExtResource("1")
@@ -73,18 +59,4 @@ environment = SubResource(3)
 position = Vector3(0, 5, 10)
 rotation_degrees = Vector3(-25, 0, 0)
 current = true
-
-[node name="TargetArrow" type="Node3D" parent="."]
-visible = false
-position = Vector3(0, 100, 0)
-
-[node name="Shaft" type="MeshInstance3D" parent="TargetArrow"]
-mesh = SubResource(4)
-material_override = SubResource(6)
-position = Vector3(0, 0.5, 0)
-
-[node name="Head" type="MeshInstance3D" parent="TargetArrow"]
-mesh = SubResource(5)
-material_override = SubResource(6)
-position = Vector3(0, 1.0, 0)
 

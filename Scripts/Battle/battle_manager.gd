@@ -186,6 +186,7 @@ func _update_highlights() -> void:
 		selected_enemy.set_highlight(true)
 
 func on_attack_pressed() -> void:
+	print("[ATTACK] state=", _state)
 	if _state != State.ALLY_SELECT_ACTION:
 		return
 	_state = State.ALLY_SELECT_TARGET
@@ -204,6 +205,7 @@ func on_defend_pressed() -> void:
 	_advance_plan()
 
 func on_enemy_clicked(unit: BattleUnit) -> void:
+	print("[TARGET] selected=", unit.name)
 	if _state != State.ALLY_SELECT_TARGET or not unit.is_enemy() or not unit.is_alive():
 		return
 	selected_enemy = unit
@@ -220,23 +222,30 @@ func on_confirm_target() -> void:
 	_advance_plan()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		return
+
 	# 마우스 우클릭으로 Attack 타겟 선택 취소
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT:
 			if _state == State.ALLY_SELECT_TARGET:
-				selected_enemy = null
-				_state = State.ALLY_SELECT_ACTION
-				state_changed.emit(_state)
-				current_planning_unit_changed.emit(_current_planning_unit())
-				_update_highlights()
+				_cancel_target_select()
 				get_viewport().set_input_as_handled()
 			return
-	if event is InputEventMouseMotion:
-		return
+
 	if _state == State.ALLY_SELECT_TARGET and Input.is_action_just_pressed("ui_accept"):
 		on_confirm_target()
 		get_viewport().set_input_as_handled()
+
+
+func _cancel_target_select() -> void:
+	selected_enemy = null
+	_state = State.ALLY_SELECT_ACTION
+	state_changed.emit(_state)
+	var cur := _current_planning_unit()
+	current_planning_unit_changed.emit(cur)
+	_update_highlights()
 
 func get_all_units() -> Array[BattleUnit]:
 	var out: Array[BattleUnit] = []

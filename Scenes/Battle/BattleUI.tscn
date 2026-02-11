@@ -1,13 +1,13 @@
-[gd_scene format=3 load_steps=7]
+[gd_scene format=3 uid="uid://s0grv2ahh47s"]
 
-[ext_resource type="Script" path="res://Scripts/UI/turn_track.gd" id="1"]
-[ext_resource type="PackedScene" path="res://Scenes/Battle/action_panel.tscn" id="2"]
-[ext_resource type="Script" path="res://Scripts/UI/enemy_intent_ui.gd" id="3"]
-[ext_resource type="Script" path="res://Scripts/UI/stats_panel.gd" id="4"]
-[ext_resource type="Script" path="res://Scripts/UI/character_list.gd" id="5"]
-[ext_resource type="Script" path="res://Scripts/UI/reaction_panel.gd" id="6"]
+[ext_resource type="Script" uid="uid://lpdtn45fintp" path="res://Scripts/UI/turn_track.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://cdttw50e6407w" path="res://Scenes/Battle/action_panel.tscn" id="2"]
+[ext_resource type="Script" uid="uid://cukidhd1sdmp7" path="res://Scripts/UI/enemy_intent_ui.gd" id="3"]
+[ext_resource type="Script" uid="uid://b2i1s2bxcu3e3" path="res://Scripts/UI/stats_panel.gd" id="4"]
+[ext_resource type="Script" uid="uid://cj0mfsi3nqivx" path="res://Scripts/UI/character_list.gd" id="5"]
+[ext_resource type="Script" uid="uid://c4kbctp1rbomd" path="res://Scripts/UI/reaction_panel.gd" id="6"]
 
-[node name="BattleUI" type="Control"]
+[node name="BattleUI" type="Control" unique_id=364593051]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,17 +15,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BottomUI" type="ColorRect" parent="."]
-anchors_preset = 12
+[node name="BottomUI" type="ColorRect" parent="." unique_id=1060719961]
+layout_mode = 0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -180.0
 color = Color(0.466667, 0.47451, 0.745098, 0.592157)
 
-[node name="StatsPanel" type="Control" parent="."]
+[node name="StatsPanel" type="Control" parent="." unique_id=1088522605]
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -37,7 +37,7 @@ grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("4")
 
-[node name="VBox" type="VBoxContainer" parent="StatsPanel"]
+[node name="VBox" type="VBoxContainer" parent="StatsPanel" unique_id=2003605251]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -50,40 +50,39 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="StatsPanel/VBox"]
+[node name="Title" type="Label" parent="StatsPanel/VBox" unique_id=995898848]
 layout_mode = 2
 text = "Unit"
 
-[node name="Stats" type="Label" parent="StatsPanel/VBox"]
+[node name="Stats" type="Label" parent="StatsPanel/VBox" unique_id=1418154246]
 layout_mode = 2
 text = "STR  AGI  INT  VIT"
 
-[node name="TurnTrack" type="HBoxContainer" parent="."]
-anchors_preset = 10
+[node name="TurnTrack" type="HBoxContainer" parent="." unique_id=1500367216]
+layout_mode = 0
 anchor_right = 1.0
 offset_top = 8.0
-offset_right = 0.0
 offset_bottom = 40.0
 mouse_filter = 2
 script = ExtResource("1")
 
-[node name="Allies" type="HBoxContainer" parent="TurnTrack"]
+[node name="Allies" type="HBoxContainer" parent="TurnTrack" unique_id=1428089785]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/separation = 4
 alignment = 2
 
-[node name="Spacer" type="Control" parent="TurnTrack"]
+[node name="Spacer" type="Control" parent="TurnTrack" unique_id=1862598796]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Enemies" type="HBoxContainer" parent="TurnTrack"]
+[node name="Enemies" type="HBoxContainer" parent="TurnTrack" unique_id=1015718036]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/separation = 4
 
-[node name="ActionPanel" parent="." instance=ExtResource("2")]
-anchors_preset = 3
+[node name="ActionPanel" parent="." unique_id=895184660 instance=ExtResource("2")]
+layout_mode = 0
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -93,8 +92,8 @@ offset_top = -126.0
 offset_right = -35.0
 offset_bottom = -33.0
 
-[node name="EnemyIntentUI" type="VBoxContainer" parent="."]
-anchors_preset = 1
+[node name="EnemyIntentUI" type="VBoxContainer" parent="." unique_id=1107888217]
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -220.0
@@ -104,14 +103,15 @@ grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("3")
 
-[node name="Title" type="Label" parent="EnemyIntentUI"]
+[node name="Title" type="Label" parent="EnemyIntentUI" unique_id=577839389]
 layout_mode = 2
 text = "Enemy intent"
 
-[node name="VBox" type="VBoxContainer" parent="EnemyIntentUI"]
+[node name="VBox" type="VBoxContainer" parent="EnemyIntentUI" unique_id=2041366779]
 layout_mode = 2
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=312431894]
+layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -122,55 +122,56 @@ offset_top = -889.0
 offset_right = -826.0
 offset_bottom = -151.0
 grow_horizontal = 0
-grow_vertical = 2
+grow_vertical = 0
+scale = Vector2(1.0413594, 0.7594986)
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=906761669]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="CharacterList" type="ScrollContainer" parent="Margin/VBox"]
+[node name="CharacterList" type="ScrollContainer" parent="Margin/VBox" unique_id=1180392395]
 visible = false
 custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 script = ExtResource("5")
 
-[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CharacterList"]
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CharacterList" unique_id=896452546]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ReactionPanel" type="VBoxContainer" parent="Margin/VBox"]
+[node name="ReactionPanel" type="VBoxContainer" parent="Margin/VBox" unique_id=1247398753]
 visible = false
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("6")
 
-[node name="Desc" type="Label" parent="Margin/VBox/ReactionPanel"]
+[node name="Desc" type="Label" parent="Margin/VBox/ReactionPanel" unique_id=1176540501]
 layout_mode = 2
 text = "Reaction"
 
-[node name="HBox" type="HBoxContainer" parent="Margin/VBox/ReactionPanel"]
+[node name="HBox" type="HBoxContainer" parent="Margin/VBox/ReactionPanel" unique_id=1656446775]
 layout_mode = 2
 
-[node name="Hold" type="Button" parent="Margin/VBox/ReactionPanel/HBox"]
+[node name="Hold" type="Button" parent="Margin/VBox/ReactionPanel/HBox" unique_id=1958363558]
 layout_mode = 2
 text = "Hold"
 
-[node name="Dodge" type="Button" parent="Margin/VBox/ReactionPanel/HBox"]
+[node name="Dodge" type="Button" parent="Margin/VBox/ReactionPanel/HBox" unique_id=991132722]
 layout_mode = 2
 text = "Dodge"
 
-[node name="Block" type="Button" parent="Margin/VBox/ReactionPanel/HBox"]
+[node name="Block" type="Button" parent="Margin/VBox/ReactionPanel/HBox" unique_id=82623497]
 layout_mode = 2
 text = "Guard"
 
-[node name="Counter" type="Button" parent="Margin/VBox/ReactionPanel/HBox"]
+[node name="Counter" type="Button" parent="Margin/VBox/ReactionPanel/HBox" unique_id=522455781]
 layout_mode = 2
 text = "Counter"
 
-[node name="DeselectOverlay" type="ColorRect" parent="."]
+[node name="DeselectOverlay" type="ColorRect" parent="." unique_id=719182513]
 visible = false
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
