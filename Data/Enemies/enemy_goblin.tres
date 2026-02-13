@@ -9,6 +9,7 @@ display_name = "Goblin"
 base_strength = 3
 base_vitality = 3
 base_agility = 4
+tint = Color(0.45, 0.7, 1.0, 1.0)
 ai_profile = 0
 level = 1
 exp_reward = 8

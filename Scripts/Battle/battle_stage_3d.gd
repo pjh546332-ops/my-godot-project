@@ -159,11 +159,18 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	outline.visible = false
 	holder.add_child(outline)
 
+	## 정의에 tint가 있으면 우선 사용(적 타입별 색상), 없으면 인자 tint
+	var final_tint: Color = tint
+	if unit.definition and "tint" in unit.definition:
+		var def_tint: Color = unit.definition.tint
+		if def_tint != Color(1.0, 1.0, 1.0, 1.0):
+			final_tint = def_tint
+
 	## 실제 표시용 Sprite3D (아웃라인 위에 렌더되도록 나중에 추가)
 	var sprite := Sprite3D.new()
 	sprite.name = "Sprite"
 	sprite.texture = sprite_tex
-	sprite.modulate = tint
+	sprite.modulate = final_tint
 	sprite.pixel_size = 0.01
 	sprite.position = Vector3(0, 0.8, 0)
 	holder.add_child(sprite)
@@ -179,6 +186,25 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 		hp_label.text = "HP: %d" % unit.hp
 	hp_label.pixel_size = 0.01
 	holder.add_child(hp_label)
+
+	## 아군만: HP 아래 이름 표시
+	var name_label := Label3D.new()
+	name_label.name = "NameLabel"
+	name_label.position = Vector3(0, 1.65, 0)
+	name_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	name_label.pixel_size = 0.008
+	if unit.is_ally():
+		if unit.definition:
+			if unit.definition.display_name != "":
+				name_label.text = unit.definition.display_name
+			else:
+				name_label.text = unit.definition.id if unit.definition.id != "" else "Ally"
+		else:
+			name_label.text = unit.unit_name if unit.unit_name != "" else "Ally"
+		name_label.visible = true
+	else:
+		name_label.visible = false
+	holder.add_child(name_label)
 
 
 func _process(_delta: float) -> void:

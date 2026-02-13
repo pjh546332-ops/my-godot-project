@@ -9,6 +9,7 @@ display_name = "Archer"
 base_strength = 4
 base_vitality = 2
 base_agility = 6
+tint = Color(1.0, 0.7, 0.4, 1.0)
 ai_profile = 0
 level = 1
 exp_reward = 10

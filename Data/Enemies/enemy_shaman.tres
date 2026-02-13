@@ -9,6 +9,7 @@ display_name = "Shaman"
 base_strength = 2
 base_vitality = 4
 base_agility = 3
+tint = Color(0.75, 0.5, 0.95, 1.0)
 ai_profile = 1
 level = 1
 exp_reward = 15

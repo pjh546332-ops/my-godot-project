@@ -3,6 +3,7 @@ extends Node2D
 
 signal menu_selected(menu_id: String, display_name: String)
 signal request_dungeon_prep
+signal request_character_book
 
 const GARDEN_VIEW_SCENE: PackedScene = preload("res://Scenes/Hub/Views/GardenView.tscn")
 const LIBRARY_VIEW_SCENE: PackedScene = preload("res://Scenes/Hub/Views/LibraryView.tscn")
@@ -17,6 +18,7 @@ const LIBRARY_VIEW_SCENE: PackedScene = preload("res://Scenes/Hub/Views/LibraryV
 @onready var library_button: Button = $"HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox/LibraryButton"
 @onready var rest_button: Button = $"HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox/RestButton"
 @onready var storage_button: Button = $"HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox/StorageButton"
+@onready var characters_button: Button = $"HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox/CharactersButton"
 
 
 func _ready() -> void:
@@ -28,6 +30,8 @@ func _ready() -> void:
 func _connect_menu_buttons() -> void:
 	dungeon_button.pressed.connect(_on_dungeon_button_pressed)
 	hub_party_button.pressed.connect(func() -> void: _on_menu_selected("hub_party", "거점/파티"))
+	if characters_button:
+		characters_button.pressed.connect(_on_characters_pressed)
 	shop_button.pressed.connect(func() -> void: _on_menu_selected("shop", "상점"))
 	management_button.pressed.connect(func() -> void: _on_menu_selected("management", "관리"))
 	garden_button.pressed.connect(func() -> void: _on_menu_selected("garden", "정원"))
@@ -55,6 +59,10 @@ func _on_menu_selected(menu_id: String, display_name: String) -> void:
 func _on_dungeon_button_pressed() -> void:
 	_on_menu_selected("dungeon", "던전")
 	request_dungeon_prep.emit()
+
+
+func _on_characters_pressed() -> void:
+	request_character_book.emit()
 
 
 func _update_main_title(text: String) -> void:

@@ -11,6 +11,7 @@ enum GameMode {
 }
 
 const HUB_SCENE := "res://Scenes/Hub/HubScene.tscn"
+const CHARACTER_BOOK_SCENE := "res://Scenes/Hub/CharacterBook.tscn"
 const PREP_SCENE := "res://Scenes/DungeonPrep/DungeonPrepScene.tscn"
 const EXPLORE_SCENE := "res://Scenes/Explore/ExploreScene.tscn"
 const FIRST_PERSON_ROOM_SCENE := "res://Scenes/Explore/FirstPersonRoom.tscn"
@@ -118,6 +119,8 @@ func switch_to(path: String) -> void:
 
 	if inst.has_signal("request_back_to_hub"):
 		inst.request_back_to_hub.connect(go_to_hub)
+	if inst.has_signal("request_character_book"):
+		inst.request_character_book.connect(_on_request_character_book)
 
 	# Dev 메뉴에서 테스트 씬 요청 신호 연결
 	if inst.has_signal("request_test_battle_3d"):
@@ -168,6 +171,10 @@ func goto_explore() -> void:
 ## Hub/DungeonPrep/Explore 전용 래퍼 (씬 신호에서 호출)
 func go_to_hub() -> void:
 	goto_hub()
+
+
+func _on_request_character_book() -> void:
+	switch_to(CHARACTER_BOOK_SCENE)
 
 
 func go_to_prep() -> void:

@@ -60,6 +60,14 @@ func get_definition(character_id: String) -> CharacterDefinition:
 	return _definitions.get(character_id, null)
 
 
+## 로스터에 등록된 아군 ID 목록 (캐릭터 북 등에서 사용)
+func get_roster_ally_ids() -> Array:
+	var ids: Array = []
+	for k in _definitions.keys():
+		ids.append(k)
+	return ids
+
+
 func get_progress(character_id: String) -> CharacterProgress:
 	if _progress.has(character_id):
 		return _progress[character_id]

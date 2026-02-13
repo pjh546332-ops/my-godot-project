@@ -1,0 +1,158 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbook_hub_001"]
+
+[ext_resource type="Script" path="res://Scripts/Hub/character_book.gd" id="1_script"]
+
+[node name="CharacterBook" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="BookHBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="BookHBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="BookHBox/TopBar"]
+layout_mode = 2
+text = "← 뒤로가기 (허브)"
+
+[node name="PageTitle" type="Label" parent="BookHBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "캐릭터 도감"
+horizontal_alignment = 1
+
+[node name="PagesHBox" type="HBoxContainer" parent="BookHBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="LeftPage" type="PanelContainer" parent="BookHBox/PagesHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(320, 0)
+
+[node name="Margin" type="MarginContainer" parent="BookHBox/PagesHBox/LeftPage"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="BookHBox/PagesHBox/LeftPage/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CharacterList" type="ItemList" parent="BookHBox/PagesHBox/LeftPage/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 120)
+max_columns = 1
+
+[node name="Portrait" type="TextureRect" parent="BookHBox/PagesHBox/LeftPage/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(128, 128)
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Sprite" type="TextureRect" parent="BookHBox/PagesHBox/LeftPage/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(96, 96)
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightPage" type="PanelContainer" parent="BookHBox/PagesHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="BookHBox/PagesHBox/RightPage"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="BookHBox/PagesHBox/RightPage/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NameLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox"]
+layout_mode = 2
+text = "(이름)"
+theme_override_font_sizes/font_size = 24
+
+[node name="StatsGrid" type="GridContainer" parent="BookHBox/PagesHBox/RightPage/Margin/VBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 8
+
+[node name="STRLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "STR"
+
+[node name="STRValue" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "0"
+
+[node name="VITLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "VIT"
+
+[node name="VITValue" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "0"
+
+[node name="AGILabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "AGI"
+
+[node name="AGIValue" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "0"
+
+[node name="LevelExpLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "Lv / EXP"
+
+[node name="LevelExpValue" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "1 / 0"
+
+[node name="MaxHPLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "Max HP"
+
+[node name="MaxHPValue" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "0"
+
+[node name="EquipmentSection" type="VBoxContainer" parent="BookHBox/PagesHBox/RightPage/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PlaceholderLabel" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/EquipmentSection"]
+layout_mode = 2
+text = "장비 (미구현)"
+
+[node name="SkillsSection" type="VBoxContainer" parent="BookHBox/PagesHBox/RightPage/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SkillsTitle" type="Label" parent="BookHBox/PagesHBox/RightPage/Margin/VBox/SkillsSection"]
+layout_mode = 2
+text = "스킬"

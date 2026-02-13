@@ -51,6 +51,10 @@ text = "던전 (탐색)"
 layout_mode = 2
 text = "거점/파티 (캐릭터 관리)"
 
+[node name="CharactersButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=298374651]
+layout_mode = 2
+text = "캐릭터 (도감/스탯)"
+
 [node name="ShopButton" type="Button" parent="HubUI/RootHBox/SideMenuPanel/SideMargin/SideVBox" unique_id=1317433987]
 layout_mode = 2
 text = "상점 (판매/구매)"
