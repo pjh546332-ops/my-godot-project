@@ -31,7 +31,7 @@ func _ready() -> void:
 	var border := Node2D.new()
 	border.name = "HighlightBorder"
 	border.visible = false
-	border.set_script(load("res://Scripts/Battle/unit_highlight_border.gd") as GDScript)
+	border.set_script(load("res://Scripts/_Archive/BattleLegacy/unit_highlight_border.gd") as GDScript)
 	add_child(border)
 
 func _on_area_input(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:

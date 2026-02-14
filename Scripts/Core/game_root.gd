@@ -16,13 +16,13 @@ const PREP_SCENE := "res://Scenes/DungeonPrep/DungeonPrepScene.tscn"
 const EXPLORE_SCENE := "res://Scenes/Explore/ExploreScene.tscn"
 const FIRST_PERSON_ROOM_SCENE := "res://Scenes/Explore/FirstPersonRoom.tscn"
 const DEV_MENU_SCENE := "res://Scenes/Dev/DevMenuScene.tscn"
-const BATTLE_SCENE_3D := "res://Scenes/Battle/BattleScene3D.tscn"
+const BATTLE_SCENE_3D := "res://Scenes/_Archive/BattleLegacy/BattleScene3D.tscn"
 
 const MODE_SCENES: Dictionary = {
 	GameMode.EXPLORE: EXPLORE_SCENE,
 	GameMode.HUB: HUB_SCENE,
 	GameMode.DUNGEON_PREP: PREP_SCENE,
-	GameMode.BATTLE: "res://Scenes/Battle/BattleScene.tscn",
+	GameMode.BATTLE: HUB_SCENE,  # 레거시 전투 비활성화: 호출 시 허브로. 복구 시 _Archive/BattleLegacy 경로로 교체
 	GameMode.DIALOGUE: "res://Scenes/Dialogue/DialogueScene.tscn",
 }
 
@@ -245,7 +245,7 @@ func _on_prologue_intro_finished() -> void:
 	if GameState:
 		GameState.current_mode = _mode_to_game_state_enum(_current_mode)
 
-	var battle_packed: PackedScene = preload("res://Scenes/Battle/BattleScene.tscn")
+	var battle_packed: PackedScene = preload("res://Scenes/_Archive/BattleLegacy/BattleScene.tscn")
 	if not battle_packed:
 		push_error("GameRoot: BattleScene 프리로드 실패 (prologue)")
 		return

@@ -353,7 +353,7 @@ func _spawn_unit_sprites() -> void:
 		pos.y += 12.0  # 발이 타일에 붙어 보이도록
 
 		var node: Node2D = Node2D.new()
-		node.set_script(load("res://Scripts/Battle/unit_node.gd") as GDScript)
+		node.set_script(load("res://Scripts/_Archive/BattleLegacy/unit_node.gd") as GDScript)
 		node.unit = u
 		node.battle_manager = battle_manager
 		node.unit_clicked_callback = _on_unit_clicked_for_selection
@@ -419,7 +419,7 @@ func _on_unit_clicked_for_selection(unit: BattleUnit) -> void:
 
 func _make_unit_sprite(color: Color) -> Node2D:
 	var node: Node2D = Node2D.new()
-	node.set_script(load("res://Scripts/Battle/unit_sprite.gd") as GDScript)
+	node.set_script(load("res://Scripts/_Archive/BattleLegacy/unit_sprite.gd") as GDScript)
 	node.fill_color = color
 	return node
 

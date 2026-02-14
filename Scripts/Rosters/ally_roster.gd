@@ -24,14 +24,14 @@ func _load_definitions() -> void:
 		return
 	dir.list_dir_begin()
 	while true:
-		var name := dir.get_next()
-		if name == "":
+		var entry_name := dir.get_next()
+		if entry_name == "":
 			break
 		if dir.current_is_dir():
 			continue
-		if not name.ends_with(".tres"):
+		if not entry_name.ends_with(".tres"):
 			continue
-		var res := load(DEF_DIR + "/" + name)
+		var res := load(DEF_DIR + "/" + entry_name)
 		if res is CharacterDefinition and res.id != "":
 			_definitions[res.id] = res
 	dir.list_dir_end()
@@ -43,14 +43,14 @@ func _load_progress() -> void:
 		return
 	dir.list_dir_begin()
 	while true:
-		var name := dir.get_next()
-		if name == "":
+		var entry_name := dir.get_next()
+		if entry_name == "":
 			break
 		if dir.current_is_dir():
 			continue
-		if not name.ends_with(".tres"):
+		if not entry_name.ends_with(".tres"):
 			continue
-		var res := load(PROGRESS_DIR + "/" + name)
+		var res := load(PROGRESS_DIR + "/" + entry_name)
 		if res is CharacterProgress and res.character_id != "":
 			_progress[res.character_id] = res
 	dir.list_dir_end()

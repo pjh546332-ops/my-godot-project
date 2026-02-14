@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://s0grv2ahh47s"]
 
 [ext_resource type="Script" uid="uid://lpdtn45fintp" path="res://Scripts/UI/turn_track.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://cdttw50e6407w" path="res://Scenes/Battle/action_panel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/_Archive/BattleLegacy/action_panel.tscn" id="2"]
 [ext_resource type="Script" uid="uid://cukidhd1sdmp7" path="res://Scripts/UI/enemy_intent_ui.gd" id="3"]
 [ext_resource type="Script" uid="uid://b2i1s2bxcu3e3" path="res://Scripts/UI/stats_panel.gd" id="4"]
 [ext_resource type="Script" uid="uid://cj0mfsi3nqivx" path="res://Scripts/UI/character_list.gd" id="5"]
@@ -58,25 +58,48 @@ text = "Unit"
 layout_mode = 2
 text = "STR  AGI  INT  VIT"
 
-[node name="TurnTrack" type="HBoxContainer" parent="." unique_id=1500367216]
-layout_mode = 0
-anchor_right = 1.0
-offset_top = 8.0
-offset_bottom = 40.0
+[node name="TurnTrack" type="Control" parent="." unique_id=1500367216]
+layout_mode = 3
+anchors_preset = 4
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -300.0
+offset_right = 300.0
+offset_top = 20.0
+offset_bottom = 52.0
+grow_horizontal = 2
 mouse_filter = 2
 script = ExtResource("1")
 
-[node name="Allies" type="HBoxContainer" parent="TurnTrack" unique_id=1428089785]
+[node name="TrackRoot" type="HBoxContainer" parent="TurnTrack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+alignment = 1
+size_flags_horizontal = 1
+
+[node name="Allies" type="HBoxContainer" parent="TurnTrack/TrackRoot" unique_id=1428089785]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/separation = 4
 alignment = 2
 
-[node name="Spacer" type="Control" parent="TurnTrack" unique_id=1862598796]
+[node name="Spacer" type="Control" parent="TurnTrack/TrackRoot" unique_id=1862598796]
 layout_mode = 2
+custom_minimum_size = Vector2(40, 28)
 size_flags_horizontal = 3
 
-[node name="Enemies" type="HBoxContainer" parent="TurnTrack" unique_id=1015718036]
+[node name="Enemies" type="HBoxContainer" parent="TurnTrack/TrackRoot" unique_id=1015718036]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/separation = 4

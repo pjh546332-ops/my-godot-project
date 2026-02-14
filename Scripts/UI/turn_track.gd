@@ -13,6 +13,10 @@ var _enemy_container: HBoxContainer = null
 const PORTRAIT_SIZE := 24
 const SLOT_COUNT_SIDE := 7
 
+func _ready() -> void:
+	print("TurnTrack size:", size)
+	print("Viewport size:", get_viewport_rect().size)
+
 func set_active_unit_by_ref(unit: BattleUnit) -> void:
 	_apply_highlight(_active_unit, false)
 	_active_unit = unit
@@ -31,52 +35,26 @@ func setup(p_battle_manager: BattleManager) -> void:
 	_refresh()
 
 func _build_fixed_slots() -> void:
-	# 기존 자식 제거 후 상단 중앙 배치용 루트 컨테이너와 좌/우 슬롯 컨테이너 생성
-	for c in get_children():
-		c.queue_free()
+	# 레이아웃은 에디터가 관리. 씬에 있는 TrackRoot / Allies / Enemies 사용.
+	var track_root: HBoxContainer = get_node_or_null("TrackRoot") as HBoxContainer
+	if track_root == null:
+		push_error("TurnTrack: TrackRoot not found. Add TrackRoot (HBoxContainer) in scene.")
+		return
+
+	_ally_container = track_root.get_node_or_null("Allies") as HBoxContainer
+	_enemy_container = track_root.get_node_or_null("Enemies") as HBoxContainer
+	if _ally_container == null or _enemy_container == null:
+		push_error("TurnTrack: Allies or Enemies not found under TrackRoot.")
+		return
+
 	_ally_slots.clear()
 	_enemy_slots.clear()
 
-	# 상단 중앙 배치
-	anchor_left = 0.5
-	anchor_right = 0.5
-	anchor_top = 0.0
-	anchor_bottom = 0.0
-	offset_left = -300.0
-	offset_right = 300.0
-	offset_top = 10.0
-	offset_bottom = 50.0
-
-	var root := HBoxContainer.new()
-	root.name = "TrackRoot"
-	root.anchor_left = 0.0
-	root.anchor_top = 0.0
-	root.anchor_right = 1.0
-	root.anchor_bottom = 1.0
-	root.offset_left = 0.0
-	root.offset_top = 0.0
-	root.offset_right = 0.0
-	root.offset_bottom = 0.0
-	root.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_theme_constant_override("separation", 40)
-	add_child(root)
-
-	_ally_container = HBoxContainer.new()
-	_ally_container.name = "AllySlots"
-	_ally_container.alignment = BoxContainer.ALIGNMENT_END
-	_ally_container.add_theme_constant_override("separation", 4)
-	root.add_child(_ally_container)
-
-	var spacer := Control.new()
-	spacer.name = "CenterSpacer"
-	spacer.custom_minimum_size = Vector2(40, PORTRAIT_SIZE + 4)
-	root.add_child(spacer)
-
-	_enemy_container = HBoxContainer.new()
-	_enemy_container.name = "EnemySlots"
-	_enemy_container.alignment = BoxContainer.ALIGNMENT_BEGIN
-	_enemy_container.add_theme_constant_override("separation", 4)
-	root.add_child(_enemy_container)
+	# 기존 슬롯 노드 제거 후 재생성 (Allies/Enemies 내부만)
+	for c in _ally_container.get_children():
+		c.queue_free()
+	for c in _enemy_container.get_children():
+		c.queue_free()
 
 	for i in SLOT_COUNT_SIDE:
 		var a_slot: Control = PanelContainer.new()
@@ -91,8 +69,8 @@ func _build_fixed_slots() -> void:
 		e_slot.name = "EnemySlot_%d" % j
 		e_slot.custom_minimum_size = Vector2(PORTRAIT_SIZE + 28, PORTRAIT_SIZE + 4)
 		e_slot.visible = false
-		_enemy_slots.append(e_slot)
 		_enemy_container.add_child(e_slot)
+		_enemy_slots.append(e_slot)
 
 func _refresh(_arg: Variant = null) -> void:
 	if not battle_manager:

@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://csda1ggtkgvmm"]
 
-[ext_resource type="Script" uid="uid://b4yi1nf87b2t7" path="res://Scripts/Battle/battle_manager.gd" id="1"]
-[ext_resource type="PackedScene" path="res://Scenes/Battle/BattleStage3D.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://s0grv2ahh47s" path="res://Scenes/Battle/BattleUI.tscn" id="3"]
-[ext_resource type="Script" uid="uid://2kk1et6yk0xn" path="res://Scripts/Battle/battle_scene_3d.gd" id="4"]
-[ext_resource type="Script" uid="uid://frt8hpi2gsso" path="res://Scripts/Battle/battle_event_dispatcher.gd" id="5"]
-[ext_resource type="Script" uid="uid://cdg2xb5wo01ag" path="res://Scripts/Battle/battle_presenter_3d.gd" id="6"]
+[ext_resource type="Script" path="res://Scripts/_Archive/BattleLegacy/battle_manager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/_Archive/BattleLegacy/BattleStage3D.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/_Archive/BattleLegacy/BattleUI.tscn" id="3"]
+[ext_resource type="Script" path="res://Scripts/_Archive/BattleLegacy/battle_scene_3d.gd" id="4"]
+[ext_resource type="Script" path="res://Scripts/_Archive/BattleLegacy/battle_event_dispatcher.gd" id="5"]
+[ext_resource type="Script" path="res://Scripts/_Archive/BattleLegacy/battle_presenter_3d.gd" id="6"]
 [ext_resource type="Script" uid="uid://cec3swf3suwqx" path="res://Scripts/UI/targeting_arrow_2d.gd" id="7"]
 
 [node name="BattleScene3D" type="Node" unique_id=1765977175]
@@ -23,6 +23,8 @@ script = ExtResource("6")
 [node name="World3D" type="Node3D" parent="." unique_id=83910089]
 
 [node name="BattleStage3D" parent="World3D" unique_id=468711759 instance=ExtResource("2")]
+ally_center_x = -4.4
+enemy_center_x = 4.4
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=410685744]
 

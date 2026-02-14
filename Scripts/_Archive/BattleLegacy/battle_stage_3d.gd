@@ -1,3 +1,4 @@
+@tool
 extends Node3D
 
 ## 3D 전투 무대에서 Units 아래에 Sprite3D를 스폰하고,
@@ -5,24 +6,9 @@ extends Node3D
 
 signal unit_clicked(unit: BattleUnit)
 
-const ALLY_SLOTS: Array[Vector3] = [
-	Vector3(-6.0, 0.5, 1.4),  # 위-바깥
-	Vector3(-4.8, 0.5, 0.7),  # 위-안쪽
-	Vector3(-3.6, 0.5, 0.0),  # 화살촉(가장 오른쪽)
-	Vector3(-4.8, 0.5, -0.7), # 아래-안쪽
-	Vector3(-6.0, 0.5, -1.4), # 아래-바깥
-]
-
-const ENEMY_SLOTS: Array[Vector3] = [
-	Vector3(6.0, 0.5, 1.4),   # 위-바깥
-	Vector3(4.8, 0.5, 0.7),   # 위-안쪽
-	Vector3(3.6, 0.5, 0.0),   # 화살촉(가장 왼쪽)
-	Vector3(4.8, 0.5, -0.7),  # 아래-안쪽
-	Vector3(6.0, 0.5, -1.4),  # 아래-바깥
-]
-
 @onready var units_root: Node3D = $StageRoot3D/Units
 @onready var camera_3d: Camera3D = $Camera3D
+@onready var map: BattleMap3D = $StageRoot3D/Map
 
 var _placeholders_created: bool = false
 var _ally_texture: Texture2D
@@ -42,6 +28,8 @@ func _ready() -> void:
 		camera_3d.global_position = Vector3(0.0, 9.0, 9.0)
 		camera_3d.look_at(Vector3(0.0, 0.8, 0.0), Vector3.UP)
 		camera_3d.fov = 55.0
+
+	_create_slot_previews()
 
 
 func spawn_units_from_manager(manager: BattleManager) -> void:
@@ -66,23 +54,102 @@ func spawn_units_from_manager(manager: BattleManager) -> void:
 		elif u.is_enemy():
 			enemies.append(u)
 
-	var idx := 0
-	for u in allies:
-		if idx >= ALLY_SLOTS.size():
-			break
-		_spawn_unit_sprite(u, ALLY_SLOTS[idx], _ally_texture, Color(0.5, 0.9, 0.5, 1.0))
-		idx += 1
+	var ally_count: int = allies.size()
+	var enemy_count: int = enemies.size()
+	if map and map.has_method("get_spawn_world"):
+		for i in range(ally_count):
+			var holder_ally: Node3D = _spawn_unit_sprite(allies[i])
+			if holder_ally:
+				var result: Array = map.get_spawn_world(0, i)
+				if result.size() >= 2:
+					holder_ally.global_position = result[0]
+					holder_ally.global_transform = Transform3D(result[1], result[0])
+		for i in range(enemy_count):
+			var holder_enemy: Node3D = _spawn_unit_sprite(enemies[i])
+			if holder_enemy:
+				var result: Array = map.get_spawn_world(1, i)
+				if result.size() >= 2:
+					holder_enemy.global_position = result[0]
+					holder_enemy.global_transform = Transform3D(result[1], result[0])
+	else:
+		var ally_slots: Array = _get_sorted_markers($AllySlots)
+		var enemy_slots: Array = _get_sorted_markers($EnemySlots)
+		for i in range(min(ally_count, ally_slots.size())):
+			var holder_ally: Node3D = _spawn_unit_sprite(allies[i])
+			if holder_ally:
+				holder_ally.global_transform = ally_slots[i].global_transform
+		for i in range(min(enemy_count, enemy_slots.size())):
+			var holder_enemy: Node3D = _spawn_unit_sprite(enemies[i])
+			if holder_enemy:
+				holder_enemy.global_transform = enemy_slots[i].global_transform
 
-	idx = 0
-	for u in enemies:
-		if idx >= ENEMY_SLOTS.size():
-			break
-		_spawn_unit_sprite(u, ENEMY_SLOTS[idx], _enemy_texture, Color(0.95, 0.5, 0.5, 1.0))
-		idx += 1
+	print("[BattleStage3D] spawn allies: %d, enemies: %d" % [ally_count, enemy_count])
+	if map and map.map_data:
+		var ally_pts: Array[UnitSpawnPoint] = map.get_spawn_points(0)
+		if ally_pts.size() > 0:
+			var sp0: UnitSpawnPoint = ally_pts[0]
+			var w0: Vector3 = sp0.get_world_pos(map.map_data)
+			print("[BattleStage3D] ally slot0 grid ", sp0.grid, " -> world ", w0)
+		var enemy_pts: Array[UnitSpawnPoint] = map.get_spawn_points(1)
+		if enemy_pts.size() > 0:
+			var sp1: UnitSpawnPoint = enemy_pts[0]
+			var w1: Vector3 = sp1.get_world_pos(map.map_data)
+			print("[BattleStage3D] enemy slot0 grid ", sp1.grid, " -> world ", w1)
 
 	# 유닛 스폰 이전에 활성화 요청이 들어온 경우(pending)를 처리
 	if _active_unit_id != "":
 		set_active_unit(_active_unit_id)
+
+
+func _get_spawn_points_or_markers(team: int) -> Array:
+	## 맵 기반: map.get_spawn_points(team). 없으면 기존 AllySlots/EnemySlots 폴백
+	if map and map.has_method("get_spawn_points"):
+		return map.get_spawn_points(team)
+	var root: Node3D = $AllySlots if team == 0 else $EnemySlots
+	return _get_sorted_markers(root)
+
+
+func _get_sorted_markers(root: Node3D) -> Array[Marker3D]:
+	var out: Array[Marker3D] = []
+	for c in root.get_children():
+		if c is Marker3D and c.name.begins_with("Slot"):
+			out.append(c)
+	out.sort_custom(func(a, b):
+		var ai: int = int(a.name.trim_prefix("Slot"))
+		var bi: int = int(b.name.trim_prefix("Slot"))
+		return ai < bi
+	)
+	return out
+
+
+func _create_slot_previews() -> void:
+	if not Engine.is_editor_hint():
+		return
+
+	var preview_root: Node3D = get_node_or_null("SlotPreview")
+	if preview_root == null:
+		return
+
+	# 기존 프리뷰 정리
+	for child in preview_root.get_children():
+		child.queue_free()
+
+	var ally_markers: Array[Marker3D] = _get_sorted_markers($AllySlots)
+	var enemy_markers: Array[Marker3D] = _get_sorted_markers($EnemySlots)
+
+	for m in ally_markers:
+		var mesh := MeshInstance3D.new()
+		mesh.mesh = BoxMesh.new()
+		mesh.scale = Vector3(0.2, 0.2, 0.2)
+		mesh.global_transform = m.global_transform
+		preview_root.add_child(mesh)
+
+	for m in enemy_markers:
+		var mesh_enemy := MeshInstance3D.new()
+		mesh_enemy.mesh = BoxMesh.new()
+		mesh_enemy.scale = Vector3(0.2, 0.2, 0.2)
+		mesh_enemy.global_transform = m.global_transform
+		preview_root.add_child(mesh_enemy)
 
 
 func _clear_units() -> void:
@@ -120,15 +187,14 @@ func _make_placeholder_texture(base_color: Color) -> Texture2D:
 	return tex
 
 
-func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, tint: Color) -> void:
+func _spawn_unit_sprite(unit: BattleUnit) -> Node3D:
 	## 단일 유닛 컨테이너 노드 (트랜스폼/선택 링 기준점)
 	var holder := Node3D.new()
-	holder.position = local_pos
 	holder.set_meta("unit_ref", unit)
 	# 원본 스케일/높이를 메타로 보관 (강조/복원에 사용)
+	units_root.add_child(holder)
 	holder.set_meta("base_scale", holder.scale)
 	holder.set_meta("base_y", holder.position.y)
-	units_root.add_child(holder)
 	_unit_nodes[unit.name] = holder
 
 	## 클릭 판정을 위한 Area3D + CollisionShape3D
@@ -144,7 +210,8 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	holder.add_child(area)
 
 	# 유닛 정의에 스프라이트가 있으면 우선 사용
-	var sprite_tex: Texture2D = tex
+	var base_tex: Texture2D = _ally_texture if unit.is_ally() else _enemy_texture
+	var sprite_tex: Texture2D = base_tex
 	if unit.definition and unit.definition.sprite_3d:
 		sprite_tex = unit.definition.sprite_3d
 
@@ -159,8 +226,8 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	outline.visible = false
 	holder.add_child(outline)
 
-	## 정의에 tint가 있으면 우선 사용(적 타입별 색상), 없으면 인자 tint
-	var final_tint: Color = tint
+	## 정의에 tint가 있으면 우선 사용(적 타입별 색상), 없으면 기본 색
+	var final_tint: Color = Color(0.5, 0.9, 0.5, 1.0) if unit.is_ally() else Color(0.95, 0.5, 0.5, 1.0)
 	if unit.definition and "tint" in unit.definition:
 		var def_tint: Color = unit.definition.tint
 		if def_tint != Color(1.0, 1.0, 1.0, 1.0):
@@ -205,6 +272,8 @@ func _spawn_unit_sprite(unit: BattleUnit, local_pos: Vector3, tex: Texture2D, ti
 	else:
 		name_label.visible = false
 	holder.add_child(name_label)
+
+	return holder
 
 
 func _process(_delta: float) -> void:

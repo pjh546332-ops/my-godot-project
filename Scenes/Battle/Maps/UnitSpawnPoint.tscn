@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Battle/Map/unit_spawn_point.gd" id="1"]
+
+[sub_resource type="CylinderMesh" id="1"]
+top_radius = 0.15
+bottom_radius = 0.15
+height = 0.6
+
+[node name="UnitSpawnPoint" type="Node3D"]
+script = ExtResource("1")
+team = 0
+slot = 0
+
+[node name="GizmoMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("1")
