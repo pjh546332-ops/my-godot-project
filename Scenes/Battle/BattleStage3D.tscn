@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://q1amneclf8hk"]
+
+[ext_resource type="Script" uid="uid://cgu0l0n7fj2o4" path="res://Scripts/Battle/battle_stage_3d_runtime.gd" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/Battle/Maps/BattleMap3D.tscn" id="2"]
+[ext_resource type="Script" uid="uid://bdidd7vtbd86d" path="res://Scripts/Battle/battle_hud.gd" id="3"]
+
+[node name="BattleStage3D" type="Node3D" unique_id=1050339939]
+script = ExtResource("1")
+
+[node name="StageRoot3D" type="Node3D" parent="." unique_id=1499802986]
+
+[node name="Map" parent="StageRoot3D" unique_id=1871004304 instance=ExtResource("2")]
+
+[node name="Units" type="Node3D" parent="StageRoot3D" unique_id=579700894]
+
+[node name="RangeHighlights" type="Node3D" parent="StageRoot3D" unique_id=50780440]
+
+[node name="FX" type="Node3D" parent="StageRoot3D" unique_id=786377154]
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=811927477]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig" unique_id=64869001]
+transform = Transform3D(0.7761566, 0.44585904, -0.4458595, 1.3815655e-08, 0.7071072, 0.7071064, 0.63054025, -0.5488252, 0.5488259, 0.88696575, 7.0801697, 8.081858)
+current = true
+fov = 50.0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=996761903]
+
+[node name="HUD" type="Control" parent="CanvasLayer" unique_id=919537536]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3")
+
+[node name="TopLeft" type="VBoxContainer" parent="CanvasLayer/HUD" unique_id=41562321]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 250.0
+offset_bottom = 120.0
+grow_horizontal = 0
+
+[node name="LabelRound" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=1519377768]
+layout_mode = 2
+text = "Round: 1"
+
+[node name="LabelTurn" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=652658579]
+layout_mode = 2
+text = "Turn: -"
+
+[node name="LabelAP" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=1988942290]
+layout_mode = 2
+text = "AP: 0 / 0"
+
+[node name="LabelMode" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=1366588784]
+layout_mode = 2
+text = "Mode: None"
+
+[node name="LabelStrain" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=1769892925]
+layout_mode = 2
+text = "Strain: 0 / 10"
+
+[node name="LabelOverheat" type="Label" parent="CanvasLayer/HUD/TopLeft" unique_id=445289356]
+visible = false
+layout_mode = 2
+text = "Overheated!"
+
+[node name="BottomRight" type="HBoxContainer" parent="CanvasLayer/HUD" unique_id=1818261560]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -60.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BtnMove" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=1885363792]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Move"
+
+[node name="BtnAttack" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=1170952760]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Attack"
+
+[node name="BtnPush" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=205015998]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Push"
+
+[node name="BtnEndTurn" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=1624880871]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "End Turn"
+
+[node name="BtnOverdriveAP" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=859080486]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+text = "Overdrive +AP"
+
+[node name="BtnOverdriveDEF" type="Button" parent="CanvasLayer/HUD/BottomRight" unique_id=1557165340]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+text = "Overdrive +DEF"

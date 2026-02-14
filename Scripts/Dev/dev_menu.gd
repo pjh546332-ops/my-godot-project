@@ -39,4 +39,3 @@ func _on_hub_pressed() -> void:
 
 func _on_explore2d_pressed() -> void:
 	request_test_explore_2d.emit()
-

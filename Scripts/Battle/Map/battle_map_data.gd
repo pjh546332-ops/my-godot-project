@@ -26,6 +26,10 @@ func is_blocked(x: int, y: int) -> bool:
 	return blocked.has(idx)
 
 
+func is_walkable(cell: Vector2i) -> bool:
+	return in_bounds(cell.x, cell.y) and not is_blocked(cell.x, cell.y)
+
+
 func set_blocked(x: int, y: int, v: bool) -> void:
 	if not in_bounds(x, y):
 		return
